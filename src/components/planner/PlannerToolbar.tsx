@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { usePlannerStore, PlannerTool } from '@/store/usePlannerStore';
+import { DeviceCatalogModal } from '@/components/devices/DeviceCatalogModal';
 import {
   MousePointer,
   SquareDashed,
@@ -13,6 +14,7 @@ import {
   Maximize2,
   Columns,
   Rows,
+  Plus,
 } from 'lucide-react';
 
 const ROOM_COLORS = [
@@ -37,7 +39,10 @@ export const PlannerToolbar: React.FC = () => {
     zoom,
     setZoom,
     setPanOffset,
+    setPlacingDeviceType,
   } = usePlannerStore();
+
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
 
   const tools: { id: PlannerTool; label: string; icon: React.ReactNode }[] = [
     {
@@ -88,6 +93,18 @@ export const PlannerToolbar: React.FC = () => {
             </button>
           );
         })}
+      </div>
+
+      {/* Add Smart Device directly from Planner */}
+      <div className="border-r border-black/10 pr-3">
+        <button
+          onClick={() => setIsCatalogOpen(true)}
+          className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#0071E3] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 shadow-xs"
+          title="Добавить умное устройство на план"
+        >
+          <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+          <span>Устройство</span>
+        </button>
       </div>
 
       {/* Door Orientation toggle (only when door tool active) */}
@@ -164,6 +181,16 @@ export const PlannerToolbar: React.FC = () => {
           <Maximize2 className="w-3.5 h-3.5" />
         </button>
       </div>
+
+      {/* Catalog modal triggered from Planner */}
+      <DeviceCatalogModal
+        isOpen={isCatalogOpen}
+        onClose={() => setIsCatalogOpen(false)}
+        onDeviceSelected={(type) => {
+          setPlacingDeviceType(type);
+          setIsCatalogOpen(false);
+        }}
+      />
     </div>
   );
 };

@@ -4,6 +4,8 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { usePlannerStore } from '@/store/usePlannerStore';
 import { Point2D } from '@/domain/types';
 import { WallDetector } from '@/domain/layout/WallDetector';
+import { DeviceFactory } from '@/domain/devices/DeviceFactory';
+import { X, Check, AlertCircle } from 'lucide-react';
 
 export const PlannerCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -22,6 +24,8 @@ export const PlannerCanvas: React.FC = () => {
     selectedEntity,
     doorOrientation,
     personPosition,
+    placingDeviceType,
+    setPlacingDeviceType,
     setSelectedEntity,
     addRoom,
     addTilesToRoom,
@@ -29,6 +33,8 @@ export const PlannerCanvas: React.FC = () => {
     moveRoom,
     addDoor,
     toggleDoor,
+    addDevice,
+    moveDevice,
     setPanOffset,
   } = usePlannerStore();
 
@@ -36,8 +42,17 @@ export const PlannerCanvas: React.FC = () => {
   const [isPointerDown, setIsPointerDown] = useState(false);
   const [dragStartCell, setDragStartCell] = useState<Point2D | null>(null);
   const [currentHoverCell, setCurrentHoverCell] = useState<Point2D | null>(null);
+  const [currentHoverRaw, setCurrentHoverRaw] = useState<Point2D | null>(null);
+
+  // Room dragging state
   const [dragRoomId, setDragRoomId] = useState<string | null>(null);
   const [dragRoomStartOffset, setDragRoomStartOffset] = useState<Point2D | null>(null);
+
+  // Device dragging state in planner
+  const [dragDeviceId, setDragDeviceId] = useState<string | null>(null);
+  const [dragDeviceOffset, setDragDeviceOffset] = useState<Point2D | null>(null);
+
+  // Canvas panning state
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState<Point2D>({ x: 0, y: 0 });
 
@@ -61,6 +76,17 @@ export const PlannerCanvas: React.FC = () => {
     },
     [panOffset, zoom]
   );
+
+  // Keyboard shortcut to cancel placement mode (Escape)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && placingDeviceType) {
+        setPlacingDeviceType(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [placingDeviceType, setPlacingDeviceType]);
 
   // Resize canvas to parent container
   useEffect(() => {
@@ -209,27 +235,39 @@ export const PlannerCanvas: React.FC = () => {
     // 4. Draw Doors
     for (const door of doors) {
       const isSelected = selectedEntity.type === 'door' && selectedEntity.id === door.id;
+      const isDoorSensorPlacing = placingDeviceType === 'door_sensor';
       const x = door.x * CELL_SIZE;
       const y = door.y * CELL_SIZE;
 
       ctx.save();
       ctx.translate(x, y);
 
+      // Highlight doors in vibrant green if placing door sensor!
+      if (isDoorSensorPlacing) {
+        ctx.shadowColor = 'rgba(52, 199, 89, 0.8)';
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = 'rgba(52, 199, 89, 0.2)';
+        if (door.orientation === 'horizontal') {
+          ctx.fillRect(-4, -12, CELL_SIZE + 8, 24);
+        } else {
+          ctx.fillRect(-12, -4, 24, CELL_SIZE + 8);
+        }
+        ctx.shadowColor = 'transparent';
+      }
+
       if (door.orientation === 'horizontal') {
         // Horizontal Door
-        // Opening gap
         ctx.clearRect(0, -3, CELL_SIZE, 6);
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, -3, CELL_SIZE, 6);
 
         // Frame posts
-        ctx.fillStyle = isSelected ? '#0071E3' : '#1D1D1F';
+        ctx.fillStyle = isSelected ? '#0071E3' : isDoorSensorPlacing ? '#34C759' : '#1D1D1F';
         ctx.fillRect(-2, -3, 4, 6);
         ctx.fillRect(CELL_SIZE - 2, -3, 4, 6);
 
         // Door leaf & swing arc
         if (door.isOpen) {
-          // Open door: leaf swings out
           ctx.strokeStyle = '#0071E3';
           ctx.lineWidth = 2.5;
           ctx.beginPath();
@@ -237,7 +275,6 @@ export const PlannerCanvas: React.FC = () => {
           ctx.lineTo(0, -CELL_SIZE);
           ctx.stroke();
 
-          // Swing arc
           ctx.setLineDash([3, 3]);
           ctx.strokeStyle = 'rgba(0, 113, 227, 0.4)';
           ctx.beginPath();
@@ -245,8 +282,7 @@ export const PlannerCanvas: React.FC = () => {
           ctx.stroke();
           ctx.setLineDash([]);
         } else {
-          // Closed door leaf
-          ctx.strokeStyle = isSelected ? '#0071E3' : '#8E8E93';
+          ctx.strokeStyle = isSelected ? '#0071E3' : isDoorSensorPlacing ? '#34C759' : '#8E8E93';
           ctx.lineWidth = 3;
           ctx.beginPath();
           ctx.moveTo(0, 0);
@@ -259,7 +295,7 @@ export const PlannerCanvas: React.FC = () => {
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(-3, 0, 6, CELL_SIZE);
 
-        ctx.fillStyle = isSelected ? '#0071E3' : '#1D1D1F';
+        ctx.fillStyle = isSelected ? '#0071E3' : isDoorSensorPlacing ? '#34C759' : '#1D1D1F';
         ctx.fillRect(-3, -2, 6, 4);
         ctx.fillRect(-3, CELL_SIZE - 2, 6, 4);
 
@@ -278,7 +314,7 @@ export const PlannerCanvas: React.FC = () => {
           ctx.stroke();
           ctx.setLineDash([]);
         } else {
-          ctx.strokeStyle = isSelected ? '#0071E3' : '#8E8E93';
+          ctx.strokeStyle = isSelected ? '#0071E3' : isDoorSensorPlacing ? '#34C759' : '#8E8E93';
           ctx.lineWidth = 3;
           ctx.beginPath();
           ctx.moveTo(0, 0);
@@ -289,30 +325,48 @@ export const PlannerCanvas: React.FC = () => {
       ctx.restore();
     }
 
-    // 5. Draw Devices in Planner mode (simplified representations)
+    // 5. Draw Devices in Planner mode
     for (const dev of Array.from(devices.values())) {
       const isSelected = selectedEntity.type === 'device' && selectedEntity.id === dev.id;
+      const isDragging = dragDeviceId === dev.id;
       const dx = dev.x * CELL_SIZE;
       const dy = dev.y * CELL_SIZE;
 
       ctx.save();
-      // Outer glow for selected
-      if (isSelected) {
+
+      // Outer glow for selected or dragging device
+      if (isDragging) {
+        ctx.shadowColor = 'rgba(0, 113, 227, 0.6)';
+        ctx.shadowBlur = 18;
+      } else if (isSelected) {
         ctx.shadowColor = '#0071E3';
         ctx.shadowBlur = 10;
       }
 
+      // If motion sensor is selected or dragging, draw its radius outline
+      if ((isSelected || isDragging) && dev.type === 'motion') {
+        const state = dev.getState() as any;
+        const rad = (state.detectionRadius || 3.5) * CELL_SIZE;
+        ctx.strokeStyle = 'rgba(0, 113, 227, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.arc(dx, dy, rad, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
       // Device badge circle
-      ctx.fillStyle = isSelected ? '#0071E3' : '#FFFFFF';
-      ctx.strokeStyle = isSelected ? '#FFFFFF' : '#D1D1D6';
+      ctx.fillStyle = isDragging ? '#0071E3' : isSelected ? '#0071E3' : '#FFFFFF';
+      ctx.strokeStyle = isDragging ? '#FFFFFF' : isSelected ? '#FFFFFF' : '#D1D1D6';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(dx, dy, 12, 0, Math.PI * 2);
+      ctx.arc(dx, dy, isDragging ? 15 : 12, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
       // Device Type Icon / Letter
-      ctx.fillStyle = isSelected ? '#FFFFFF' : '#1D1D1F';
+      ctx.fillStyle = isDragging || isSelected ? '#FFFFFF' : '#1D1D1F';
       ctx.font = '700 10px -apple-system, BlinkMacSystemFont, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -329,10 +383,85 @@ export const PlannerCanvas: React.FC = () => {
       };
       ctx.fillText(typeSymbol[dev.type] || '•', dx, dy + 1);
 
+      // Name tooltip when selected or dragged
+      if (isSelected || isDragging) {
+        const devName = dev.name;
+        ctx.font = '600 10px -apple-system, BlinkMacSystemFont, sans-serif';
+        const nw = ctx.measureText(devName).width + 12;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+        ctx.beginPath();
+        ctx.roundRect(dx - nw / 2, dy - 26, nw, 16, 5);
+        ctx.fill();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(devName, dx, dy - 18);
+      }
+
       ctx.restore();
     }
 
-    // 6. Draw Previews & Active Tools
+    // 6. Draw Interactive Device Placement Ghost Preview
+    if (placingDeviceType && currentHoverRaw) {
+      const hx = currentHoverRaw.x * CELL_SIZE;
+      const hy = currentHoverRaw.y * CELL_SIZE;
+
+      ctx.save();
+
+      // If motion sensor, preview radius
+      if (placingDeviceType === 'motion') {
+        ctx.strokeStyle = 'rgba(0, 113, 227, 0.5)';
+        ctx.fillStyle = 'rgba(0, 113, 227, 0.08)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.arc(hx, hy, 3.5 * CELL_SIZE, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Ghost circle
+      ctx.shadowColor = 'rgba(0, 113, 227, 0.4)';
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = 'rgba(0, 113, 227, 0.85)';
+      ctx.beginPath();
+      ctx.arc(hx, hy, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+
+      // Ghost icon
+      const ghostSymbols: Record<string, string> = {
+        light: '💡',
+        motion: '👁️',
+        door_sensor: '🚪',
+        thermostat: '🌡️',
+        heater: '♨️',
+        curtains: '🪟',
+        ac: '❄️',
+        socket: '⚡',
+      };
+      ctx.font = '14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ghostSymbols[placingDeviceType] || '•', hx, hy);
+
+      // Tooltip following cursor
+      const labelText =
+        placingDeviceType === 'door_sensor'
+          ? 'Нажмите на дверь для установки'
+          : 'Нажмите, чтобы поставить';
+      ctx.font = '600 10px -apple-system, BlinkMacSystemFont, sans-serif';
+      const tw = ctx.measureText(labelText).width + 14;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.beginPath();
+      ctx.roundRect(hx - tw / 2, hy - 32, tw, 18, 6);
+      ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText(labelText, hx, hy - 23);
+
+      ctx.restore();
+    }
+
+    // 7. Draw Previews for Room tools
     if (activeTool === 'room_rect' && dragStartCell && currentHoverCell && isPointerDown) {
       const minX = Math.min(dragStartCell.x, currentHoverCell.x);
       const maxX = Math.max(dragStartCell.x, currentHoverCell.x);
@@ -383,7 +512,6 @@ export const PlannerCanvas: React.FC = () => {
         CELL_SIZE
       );
     } else if (activeTool === 'door' && currentHoverCell) {
-      // Validate if current cell/edge is valid for door placement
       const validation = WallDetector.isValidDoorPlacement(
         rooms,
         currentHoverCell.x,
@@ -440,8 +568,11 @@ export const PlannerCanvas: React.FC = () => {
     selectedEntity,
     doorOrientation,
     personPosition,
+    placingDeviceType,
+    dragDeviceId,
     dragStartCell,
     currentHoverCell,
+    currentHoverRaw,
     isPointerDown,
   ]);
 
@@ -450,18 +581,54 @@ export const PlannerCanvas: React.FC = () => {
     const { cell, raw } = pixelToGrid(e.clientX, e.clientY);
     setIsPointerDown(true);
 
-    // Spacebar or middle click for panning
+    // 1. Device Placement Mode Active
+    if (placingDeviceType) {
+      if (placingDeviceType === 'door_sensor') {
+        // Must be placed on or directly next to a door
+        const targetDoor = doors.find(
+          (d) =>
+            d.containsPoint(raw) ||
+            Math.hypot(raw.x - (d.x + 0.5), raw.y - (d.y + 0.5)) <= 1.2
+        );
+
+        if (!targetDoor) {
+          alert('Датчик открытия можно устанавливать только на двери! Пожалуйста, нажмите на дверной проем.');
+          return;
+        }
+
+        const newDev = addDevice(
+          'door_sensor',
+          targetDoor.x + 0.5,
+          targetDoor.y + 0.5,
+          undefined,
+          { doorId: targetDoor.id }
+        );
+        setPlacingDeviceType(null);
+        setSelectedEntity({ type: 'device', id: newDev.id });
+        return;
+      } else {
+        // Snap to nearest 0.5 grid step
+        const snappedX = Math.round(raw.x * 2) / 2;
+        const snappedY = Math.round(raw.y * 2) / 2;
+        const newDev = addDevice(placingDeviceType, snappedX, snappedY);
+        setPlacingDeviceType(null);
+        setSelectedEntity({ type: 'device', id: newDev.id });
+        return;
+      }
+    }
+
+    // 2. Spacebar or middle click for panning
     if (e.button === 1 || e.buttons === 4 || e.shiftKey) {
       setIsPanning(true);
       setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
       return;
     }
 
+    // 3. Rectangle tool
     if (activeTool === 'room_rect') {
       setDragStartCell(cell);
       setCurrentHoverCell(cell);
     } else if (activeTool === 'brush') {
-      // If a room is selected, paint into it; else create a new room or paint into clicked room
       const clickedRoom = WallDetector.findRoomAtPoint(rooms, cell);
       if (selectedEntity.type === 'room' && selectedEntity.id) {
         addTilesToRoom(selectedEntity.id, [cell]);
@@ -473,7 +640,6 @@ export const PlannerCanvas: React.FC = () => {
         setSelectedEntity({ type: 'room', id: room.id });
       }
     } else if (activeTool === 'eraser') {
-      // Find room under cell and remove tile
       for (const room of rooms) {
         if (room.hasTile(cell.x, cell.y)) {
           removeTilesFromRoom(room.id, [cell]);
@@ -485,7 +651,7 @@ export const PlannerCanvas: React.FC = () => {
         setSelectedEntity({ type: 'door', id: door.id });
       }
     } else if (activeTool === 'select') {
-      // 1. Check if clicked on a device
+      // 1. Check if clicked on a device -> Enable Dragging in Planner!
       let clickedDev: string | null = null;
       for (const dev of Array.from(devices.values())) {
         if (dev.containsPoint(raw)) {
@@ -496,6 +662,9 @@ export const PlannerCanvas: React.FC = () => {
 
       if (clickedDev) {
         setSelectedEntity({ type: 'device', id: clickedDev });
+        setDragDeviceId(clickedDev);
+        const dev = devices.get(clickedDev)!;
+        setDragDeviceOffset({ x: raw.x - dev.x, y: raw.y - dev.y });
         return;
       }
 
@@ -506,7 +675,7 @@ export const PlannerCanvas: React.FC = () => {
         return;
       }
 
-      // 3. Check if clicked on a room
+      // 3. Check if clicked on a room -> Enable room move
       const clickedRoom = WallDetector.findRoomAtPoint(rooms, cell);
       if (clickedRoom) {
         setSelectedEntity({ type: 'room', id: clickedRoom.id });
@@ -527,11 +696,21 @@ export const PlannerCanvas: React.FC = () => {
       return;
     }
 
-    const { cell } = pixelToGrid(e.clientX, e.clientY);
+    const { cell, raw } = pixelToGrid(e.clientX, e.clientY);
     setCurrentHoverCell(cell);
+    setCurrentHoverRaw(raw);
 
     if (!isPointerDown) return;
 
+    // Dragging device in Planner mode
+    if (activeTool === 'select' && dragDeviceId && dragDeviceOffset) {
+      const newX = raw.x - dragDeviceOffset.x;
+      const newY = raw.y - dragDeviceOffset.y;
+      moveDevice(dragDeviceId, newX, newY);
+      return;
+    }
+
+    // Brush painting
     if (activeTool === 'brush') {
       if (selectedEntity.type === 'room' && selectedEntity.id) {
         addTilesToRoom(selectedEntity.id, [cell]);
@@ -557,6 +736,18 @@ export const PlannerCanvas: React.FC = () => {
       setIsPanning(false);
       setIsPointerDown(false);
       return;
+    }
+
+    // If device was dragged in Planner, snap cleanly
+    if (dragDeviceId) {
+      const dev = devices.get(dragDeviceId);
+      if (dev) {
+        const snappedX = Math.round(dev.x * 2) / 2;
+        const snappedY = Math.round(dev.y * 2) / 2;
+        moveDevice(dragDeviceId, snappedX, snappedY);
+      }
+      setDragDeviceId(null);
+      setDragDeviceOffset(null);
     }
 
     if (activeTool === 'room_rect' && dragStartCell && currentHoverCell) {
@@ -586,21 +777,49 @@ export const PlannerCanvas: React.FC = () => {
 
   return (
     <div className="relative w-full h-full overflow-hidden select-none bg-[#F5F5F7]">
+      {/* Floating Placement Banner when placing a device */}
+      {placingDeviceType && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 bg-white/95 backdrop-blur-xl border border-blue-200 px-5 py-3 rounded-2xl shadow-apple-hover flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-200">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
+            <div>
+              <h4 className="text-xs font-bold text-zinc-900">
+                Размещение: {DeviceFactory.getDefaultName(placingDeviceType)}
+              </h4>
+              <p className="text-[11px] text-zinc-500">
+                {placingDeviceType === 'door_sensor'
+                  ? '🚪 Нажмите на дверной проем на плане (подсвечен зеленым)'
+                  : '📍 Нажмите на плане в месте, куда хотите установить устройство'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setPlacingDeviceType(null)}
+            className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors"
+          >
+            <X className="w-3.5 h-3.5" /> Отмена (Esc)
+          </button>
+        </div>
+      )}
+
       <canvas
         ref={canvasRef}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        className="w-full h-full touch-none cursor-crosshair"
+        className="w-full h-full touch-none"
         style={{
-          cursor:
-            isPanning
-              ? 'grabbing'
-              : activeTool === 'select'
-              ? 'default'
-              : activeTool === 'eraser'
-              ? 'cell'
-              : 'crosshair',
+          cursor: isPanning
+            ? 'grabbing'
+            : placingDeviceType
+            ? 'crosshair'
+            : dragDeviceId
+            ? 'grabbing'
+            : activeTool === 'select'
+            ? 'default'
+            : activeTool === 'eraser'
+            ? 'cell'
+            : 'crosshair',
         }}
       />
     </div>

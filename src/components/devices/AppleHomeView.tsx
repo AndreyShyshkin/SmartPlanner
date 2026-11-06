@@ -33,6 +33,7 @@ export const AppleHomeView: React.FC<AppleHomeViewProps> = ({
     doors,
     addDevice,
     setActiveTab,
+    setPlacingDeviceType,
   } = usePlannerStore();
 
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
@@ -50,32 +51,9 @@ export const AppleHomeView: React.FC<AppleHomeViewProps> = ({
   const activeCount = deviceList.filter((d) => d.getState().isOn).length;
 
   const handleDeviceSelectedFromCatalog = (type: DeviceType) => {
-    // Drop the device into the center of the currently selected room, or center of the canvas
-    let targetX = 8;
-    let targetY = 8;
-
-    if (type === 'door_sensor') {
-      // If placing a door sensor, find a door if available
-      const door = doors[0];
-      if (door) {
-        targetX = door.x;
-        targetY = door.y;
-      }
-    } else if (selectedRoomId) {
-      const room = rooms.find((r) => r.id === selectedRoomId);
-      if (room && room.tiles.size > 0) {
-        const center = room.getCenter();
-        targetX = center.x;
-        targetY = center.y;
-      }
-    } else if (rooms.length > 0 && rooms[0].tiles.size > 0) {
-      const center = rooms[0].getCenter();
-      targetX = center.x;
-      targetY = center.y;
-    }
-
-    const newDev = addDevice(type, targetX, targetY);
-    setInspectingDevice(newDev);
+    // Switch to planner canvas in interactive placement mode
+    setPlacingDeviceType(type);
+    setActiveTab('planner');
   };
 
   return (

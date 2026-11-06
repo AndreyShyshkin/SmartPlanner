@@ -60,7 +60,9 @@ export interface PlannerStoreState {
   // Devices
   devices: Map<string, ISmartDevice>;
   deviceGroups: DeviceGroup[];
-  addDevice: (type: DeviceType, x: number, y: number, name?: string) => ISmartDevice;
+  placingDeviceType: DeviceType | null;
+  setPlacingDeviceType: (type: DeviceType | null) => void;
+  addDevice: (type: DeviceType, x: number, y: number, name?: string, customState?: any) => ISmartDevice;
   updateDevice: (id: string, patch: any) => void;
   toggleDevice: (id: string) => void;
   deleteDevice: (id: string) => void;
@@ -258,8 +260,10 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     { id: 'grp_living', name: 'Гостиная', roomIds: [], deviceIds: [], color: '#0071E3' },
     { id: 'grp_climate', name: 'Климат', roomIds: [], deviceIds: [], color: '#FF9500' },
   ],
+  placingDeviceType: null,
+  setPlacingDeviceType: (placingDeviceType) => set({ placingDeviceType }),
 
-  addDevice: (type, x, y, name) => {
+  addDevice: (type, x, y, name, customState) => {
     const { rooms } = get();
     // Automatically find which room this point falls into
     const room = WallDetector.findRoomAtPoint(rooms, { x, y });
@@ -268,6 +272,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
       y,
       name,
       roomId: room ? room.id : null,
+      state: customState,
     });
 
     set((state) => {

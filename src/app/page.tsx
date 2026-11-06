@@ -12,12 +12,18 @@ import { AppleHomeView } from '@/components/devices/AppleHomeView';
 import { SimulationView } from '@/components/simulation/SimulationView';
 import { ScenesModal } from '@/components/automations/ScenesModal';
 import { AutomationsModal } from '@/components/automations/AutomationsModal';
+import { DeviceInspectorModal } from '@/components/devices/DeviceInspectorModal';
 
 export default function Home() {
-  const { activeTab, loadTemplate } = usePlannerStore();
+  const { activeTab, selectedEntity, setSelectedEntity, devices } = usePlannerStore();
   const [isInPlanner, setIsInPlanner] = useState(false);
   const [isScenesModalOpen, setIsScenesModalOpen] = useState(false);
   const [isAutomationsModalOpen, setIsAutomationsModalOpen] = useState(false);
+
+  const selectedDevice =
+    selectedEntity.type === 'device' && selectedEntity.id
+      ? devices.get(selectedEntity.id) || null
+      : null;
 
   // Initialize with sample template once if needed
   useEffect(() => {
@@ -62,6 +68,10 @@ export default function Home() {
       </div>
 
       {/* Modals */}
+      <DeviceInspectorModal
+        device={selectedDevice}
+        onClose={() => setSelectedEntity({ type: null, id: null })}
+      />
       <ScenesModal
         isOpen={isScenesModalOpen}
         onClose={() => setIsScenesModalOpen(false)}
