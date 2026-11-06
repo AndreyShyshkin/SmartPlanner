@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Point2D, DeviceType, DeviceGroup, DoorOrientation } from '../domain/types';
+import { Point2D, DeviceType, DeviceGroup, DoorOrientation, CELL_SIZE } from '../domain/types';
 import { Room } from '../domain/layout/Room';
 import { Door } from '../domain/layout/Door';
 import { ISmartDevice } from '../domain/interfaces/ISmartDevice';
@@ -31,6 +31,7 @@ export interface PlannerStoreState {
   panOffset: Point2D;
   setZoom: (zoom: number) => void;
   setPanOffset: (offset: Point2D) => void;
+  centerView: (viewportWidth?: number, viewportHeight?: number) => void;
 
   // Planner tools
   activeTool: PlannerTool;
@@ -118,6 +119,41 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
   panOffset: { x: 0, y: 0 },
   setZoom: (zoom) => set({ zoom: Math.max(0.4, Math.min(2.5, zoom)) }),
   setPanOffset: (panOffset) => set({ panOffset }),
+  centerView: (viewportWidth, viewportHeight) => {
+    const { rooms, gridWidth, gridHeight, zoom } = get();
+
+    const w = viewportWidth || (typeof window !== 'undefined' ? window.innerWidth : 1200);
+    const h = viewportHeight || (typeof window !== 'undefined' ? window.innerHeight - 64 : 800);
+
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let hasRooms = false;
+    for (const r of rooms) {
+      if (r.tiles.size > 0) {
+        hasRooms = true;
+        const b = r.getBounds();
+        if (b.minX < minX) minX = b.minX;
+        if (b.minY < minY) minY = b.minY;
+        if (b.maxX > maxX) maxX = b.maxX;
+        if (b.maxY > maxY) maxY = b.maxY;
+      }
+    }
+
+    let targetCenterX: number;
+    let targetCenterY: number;
+
+    if (hasRooms && minX !== Infinity) {
+      targetCenterX = ((minX + maxX + 1) / 2) * CELL_SIZE;
+      targetCenterY = ((minY + maxY + 1) / 2) * CELL_SIZE;
+    } else {
+      targetCenterX = (gridWidth * CELL_SIZE) / 2;
+      targetCenterY = (gridHeight * CELL_SIZE) / 2;
+    }
+
+    const targetOffsetX = Math.round((w / 2) - targetCenterX * zoom);
+    const targetOffsetY = Math.round((h / 2) - targetCenterY * zoom);
+
+    set({ panOffset: { x: targetOffsetX, y: targetOffsetY } });
+  },
 
   // Tools
   activeTool: 'select',
@@ -639,6 +675,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
         isPersonHome: data.simulation?.isPersonHome ?? true,
         personPosition: data.simulation?.personPosition ?? { x: 5, y: 5 },
       });
+      get().centerView();
       return true;
     } catch (err) {
       console.error('Failed to load project JSON:', err);
@@ -747,36 +784,36 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     }
 
     // Default template: Beautiful 2-Room Smart Apartment
-    // 1. Гостиная (Living Room): x: 3..12, y: 3..10 (width 10, height 8) = 20 m²
+    // 1. Гостиная (Living Room): x: 6..15, y: 3..10 (width 10, height 8) = 20 m²
     const livingTiles: Point2D[] = [];
-    for (let x = 3; x <= 12; x++) {
+    for (let x = 6; x <= 15; x++) {
       for (let y = 3; y <= 10; y++) {
         livingTiles.push({ x, y });
       }
     }
 
-    // 2. Спальня (Bedroom): x: 13..21, y: 3..10 (width 9, height 8) = 18 m²
-    // Прямой стык с гостиной по стене x=13 без зазоров!
+    // 2. Спальня (Bedroom): x: 16..24, y: 3..10 (width 9, height 8) = 18 m²
+    // Прямой стык с гостиной по стене x=16 без зазоров!
     const bedroomTiles: Point2D[] = [];
-    for (let x = 13; x <= 21; x++) {
+    for (let x = 16; x <= 24; x++) {
       for (let y = 3; y <= 10; y++) {
         bedroomTiles.push({ x, y });
       }
     }
 
-    // 3. Кухня (Kitchen): x: 3..12, y: 11..17 (width 10, height 7) = 17.5 m²
+    // 3. Кухня (Kitchen): x: 6..15, y: 11..17 (width 10, height 7) = 17.5 m²
     // Прямой стык с гостиной по стене y=11 без зазоров!
     const kitchenTiles: Point2D[] = [];
-    for (let x = 3; x <= 12; x++) {
+    for (let x = 6; x <= 15; x++) {
       for (let y = 11; y <= 17; y++) {
         kitchenTiles.push({ x, y });
       }
     }
 
-    // 4. Прихожая (Hallway / Entry): x: 13..17, y: 11..17 (width 5, height 7) = 8.75 m²
-    // Прямой стык с кухней по стене x=13 и со спальней по стене y=11 без зазоров!
+    // 4. Прихожая (Hallway / Entry): x: 16..20, y: 11..17 (width 5, height 7) = 8.75 m²
+    // Прямой стык с кухней по стене x=16 и со спальней по стене y=11 без зазоров!
     const hallwayTiles: Point2D[] = [];
-    for (let x = 13; x <= 17; x++) {
+    for (let x = 16; x <= 20; x++) {
       for (let y = 11; y <= 17; y++) {
         hallwayTiles.push({ x, y });
       }
@@ -790,11 +827,11 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const rooms = [livingRoom, bedroom, kitchen, hallway];
 
     // Doors on walls - единые двери без зазоров и двери в прихожей:
-    const door1 = new Door('door_1', 13, 6, 'vertical', false, 'Дверь Гостиная — Спальня', ['room_living', 'room_bedroom']);
-    const door2 = new Door('door_2', 7, 11, 'horizontal', false, 'Дверь Гостиная — Кухня', ['room_living', 'room_kitchen']);
-    const door3 = new Door('door_3', 13, 14, 'vertical', false, 'Дверь Прихожая — Кухня', ['room_kitchen', 'room_hallway']);
-    const door4 = new Door('door_4', 15, 11, 'horizontal', false, 'Дверь Прихожая — Спальня', ['room_bedroom', 'room_hallway']);
-    const door5 = new Door('door_5', 15, 18, 'horizontal', false, 'Входная дверь', ['room_hallway']);
+    const door1 = new Door('door_1', 16, 6, 'vertical', false, 'Дверь Гостиная — Спальня', ['room_living', 'room_bedroom']);
+    const door2 = new Door('door_2', 10, 11, 'horizontal', false, 'Дверь Гостиная — Кухня', ['room_living', 'room_kitchen']);
+    const door3 = new Door('door_3', 16, 14, 'vertical', false, 'Дверь Прихожая — Кухня', ['room_kitchen', 'room_hallway']);
+    const door4 = new Door('door_4', 18, 11, 'horizontal', false, 'Дверь Прихожая — Спальня', ['room_bedroom', 'room_hallway']);
+    const door5 = new Door('door_5', 18, 18, 'horizontal', false, 'Входная дверь', ['room_hallway']);
     const doors = [door1, door2, door3, door4, door5];
 
     // Devices
@@ -804,7 +841,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const light1 = DeviceFactory.createDevice('light', {
       id: 'light_living',
       name: 'Люстра в гостиной',
-      x: 7.5,
+      x: 10.5,
       y: 6.5,
       roomId: 'room_living',
       state: { isOn: true, brightness: 90, color: '#FFD60A' },
@@ -812,7 +849,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const motion1 = DeviceFactory.createDevice('motion', {
       id: 'motion_living',
       name: 'Датчик движения (Гостиная)',
-      x: 3.5,
+      x: 6.5,
       y: 3.5,
       roomId: 'room_living',
       state: { detectionRadius: 5, fovAngle: 120, rotationAngle: 45 },
@@ -820,7 +857,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const curtains1 = DeviceFactory.createDevice('curtains', {
       id: 'curtains_living',
       name: 'Шторы в гостиной',
-      x: 3.5,
+      x: 6.5,
       y: 6.5,
       roomId: 'room_living',
       state: { openPercentage: 80 },
@@ -828,7 +865,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const heater1 = DeviceFactory.createDevice('heater', {
       id: 'heater_living',
       name: 'Батарея в гостиной',
-      x: 12,
+      x: 15,
       y: 9.5,
       roomId: 'room_living',
       state: { isOn: false, powerLevel: 70 },
@@ -836,7 +873,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const ac1 = DeviceFactory.createDevice('ac', {
       id: 'ac_living',
       name: 'Кондиционер в гостиной',
-      x: 3.5,
+      x: 6.5,
       y: 9.5,
       roomId: 'room_living',
       state: { isOn: false, targetTemp: 22, mode: 'cool' },
@@ -844,7 +881,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const thermoLiving = DeviceFactory.createDevice('thermostat', {
       id: 'thermo_living',
       name: 'Термостат гостиной',
-      x: 7.5,
+      x: 10.5,
       y: 3.5,
       roomId: 'room_living',
       state: { targetTemperature: 22.0, currentTemperature: 21.0, mode: 'auto', autoManageClimate: true },
@@ -854,7 +891,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const light2 = DeviceFactory.createDevice('light', {
       id: 'light_bed',
       name: 'Свет в спальне',
-      x: 17,
+      x: 20,
       y: 6.5,
       roomId: 'room_bedroom',
       state: { isOn: false, brightness: 50, color: '#FF3B30' },
@@ -862,7 +899,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const thermo1 = DeviceFactory.createDevice('thermostat', {
       id: 'thermo_bed',
       name: 'Климат спальни',
-      x: 19.5,
+      x: 22.5,
       y: 4.5,
       roomId: 'room_bedroom',
       state: { targetTemperature: 21.5, currentTemperature: 21.0, mode: 'auto', autoManageClimate: true },
@@ -872,7 +909,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const lightKitchen = DeviceFactory.createDevice('light', {
       id: 'light_kitchen',
       name: 'Подсветка кухни',
-      x: 7.5,
+      x: 10.5,
       y: 14.5,
       roomId: 'room_kitchen',
       state: { isOn: true, brightness: 80, color: '#FFD60A' },
@@ -882,7 +919,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const lightHallway = DeviceFactory.createDevice('light', {
       id: 'light_hallway',
       name: 'Свет в прихожей',
-      x: 15.5,
+      x: 18.5,
       y: 14.5,
       roomId: 'room_hallway',
       state: { isOn: true, brightness: 75, color: '#FFFFFF' },
@@ -890,7 +927,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const motionHallway = DeviceFactory.createDevice('motion', {
       id: 'motion_hallway',
       name: 'Датчик движения (Прихожая)',
-      x: 16.5,
+      x: 19.5,
       y: 12.5,
       roomId: 'room_hallway',
       state: { detectionRadius: 4, fovAngle: 110, rotationAngle: 210 },
@@ -898,7 +935,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const doorSensorEntrance = DeviceFactory.createDevice('door_sensor', {
       id: 'doorsensor_entrance',
       name: 'Датчик входной двери',
-      x: 15,
+      x: 18,
       y: 18,
       roomId: 'room_hallway',
       state: { doorId: 'door_5' },
@@ -906,7 +943,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const doorSensorBed = DeviceFactory.createDevice('door_sensor', {
       id: 'doorsensor_bed',
       name: 'Датчик двери спальни',
-      x: 15,
+      x: 18,
       y: 11,
       roomId: 'room_hallway',
       state: { doorId: 'door_4' },
@@ -967,10 +1004,11 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
       devices,
       scenes,
       automations,
-      personPosition: { x: 15.5, y: 15.5 },
+      personPosition: { x: 18.5, y: 15.5 },
       isPersonHome: true,
       timeOfDayHours: 12,
       ambientTemperature: 21.5,
     });
+    get().centerView();
   },
 }));

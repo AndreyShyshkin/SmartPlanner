@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { usePlannerStore } from '@/store/usePlannerStore';
-import { Point2D } from '@/domain/types';
+import { Point2D, CELL_SIZE } from '@/domain/types';
 import { WallDetector } from '@/domain/layout/WallDetector';
 import { DeviceFactory } from '@/domain/devices/DeviceFactory';
 import { X, Check, AlertCircle } from 'lucide-react';
@@ -35,7 +35,9 @@ export const PlannerCanvas: React.FC = () => {
     toggleDoor,
     addDevice,
     moveDevice,
+    setZoom,
     setPanOffset,
+    centerView,
   } = usePlannerStore();
 
   // Interaction states
@@ -61,9 +63,6 @@ export const PlannerCanvas: React.FC = () => {
   // Canvas panning state
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState<Point2D>({ x: 0, y: 0 });
-
-  // Grid cell sizing in pixels (base scale)
-  const CELL_SIZE = 32;
 
   // Convert canvas pixel coordinates to grid cell coordinates
   const pixelToGrid = useCallback(
@@ -94,7 +93,7 @@ export const PlannerCanvas: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [placingDeviceType, setPlacingDeviceType]);
 
-  // Resize canvas to parent container
+  // Resize canvas to parent container & auto-center
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -107,12 +106,34 @@ export const PlannerCanvas: React.FC = () => {
       canvas.height = parent.clientHeight * dpr;
       canvas.style.width = `${parent.clientWidth}px`;
       canvas.style.height = `${parent.clientHeight}px`;
+
+      // Auto-center floor plan on mount if not panned
+      const currentOffset = usePlannerStore.getState().panOffset;
+      if (currentOffset.x === 0 && currentOffset.y === 0) {
+        centerView(parent.clientWidth, parent.clientHeight);
+      }
     };
 
     resize();
     window.addEventListener('resize', resize);
     return () => window.removeEventListener('resize', resize);
-  }, []);
+  }, [centerView]);
+
+  // Smooth wheel zoom and pan (trackpad pinch & scroll)
+  const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    if (e.ctrlKey || e.metaKey) {
+      // Pinch to zoom
+      const zoomFactor = e.deltaY < 0 ? 1.05 : 0.95;
+      setZoom(zoom * zoomFactor);
+    } else {
+      // Two-finger scroll to pan
+      setPanOffset({
+        x: panOffset.x - e.deltaX,
+        y: panOffset.y - e.deltaY,
+      });
+    }
+  };
 
   // Main Render Loop
   useEffect(() => {
@@ -854,6 +875,7 @@ export const PlannerCanvas: React.FC = () => {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onWheel={handleWheel}
         className="w-full h-full touch-none"
         style={{
           cursor: isPanning

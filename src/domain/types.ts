@@ -1,3 +1,5 @@
+export const CELL_SIZE = 34;
+
 export interface Point2D {
   x: number;
   y: number;

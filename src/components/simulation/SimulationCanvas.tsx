@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { usePlannerStore } from '@/store/usePlannerStore';
-import { Point2D } from '@/domain/types';
+import { Point2D, CELL_SIZE } from '@/domain/types';
 import { WallDetector } from '@/domain/layout/WallDetector';
 import { Raycaster } from '@/domain/physics/Raycaster';
 
@@ -20,6 +20,9 @@ export const SimulationCanvas: React.FC = () => {
     personPosition,
     isPersonHome,
     timeOfDayHours,
+    setZoom,
+    setPanOffset,
+    centerView,
     setPersonPosition,
     toggleDevice,
     toggleDoor,
@@ -28,8 +31,6 @@ export const SimulationCanvas: React.FC = () => {
 
   const [isDraggingAvatar, setIsDraggingAvatar] = useState(false);
   const [avatarTarget, setAvatarTarget] = useState<Point2D | null>(null);
-
-  const CELL_SIZE = 34;
 
   const pixelToGrid = useCallback(
     (clientX: number, clientY: number): { x: number; y: number } => {
@@ -43,7 +44,7 @@ export const SimulationCanvas: React.FC = () => {
     [panOffset, zoom]
   );
 
-  // Resize canvas
+  // Resize canvas & auto-center on mount
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -56,12 +57,32 @@ export const SimulationCanvas: React.FC = () => {
       canvas.height = parent.clientHeight * dpr;
       canvas.style.width = `${parent.clientWidth}px`;
       canvas.style.height = `${parent.clientHeight}px`;
+
+      // Auto-center floor plan on mount if not panned
+      const currentOffset = usePlannerStore.getState().panOffset;
+      if (currentOffset.x === 0 && currentOffset.y === 0) {
+        centerView(parent.clientWidth, parent.clientHeight);
+      }
     };
 
     resize();
     window.addEventListener('resize', resize);
     return () => window.removeEventListener('resize', resize);
-  }, []);
+  }, [centerView]);
+
+  // Smooth wheel zoom and pan (trackpad pinch & scroll)
+  const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    if (e.ctrlKey || e.metaKey) {
+      const zoomFactor = e.deltaY < 0 ? 1.05 : 0.95;
+      setZoom(zoom * zoomFactor);
+    } else {
+      setPanOffset({
+        x: panOffset.x - e.deltaX,
+        y: panOffset.y - e.deltaY,
+      });
+    }
+  };
 
   // Keyboard navigation for avatar (WASD / Arrow Keys)
   useEffect(() => {
@@ -536,6 +557,7 @@ export const SimulationCanvas: React.FC = () => {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onWheel={handleWheel}
         className="w-full h-full touch-none cursor-pointer"
       />
     </div>

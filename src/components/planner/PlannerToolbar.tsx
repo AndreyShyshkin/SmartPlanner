@@ -40,6 +40,7 @@ export const PlannerToolbar: React.FC = () => {
     setZoom,
     setPanOffset,
     setPlacingDeviceType,
+    centerView,
   } = usePlannerStore();
 
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
@@ -173,9 +174,9 @@ export const PlannerToolbar: React.FC = () => {
         <button
           onClick={() => {
             setZoom(1);
-            setPanOffset({ x: 0, y: 0 });
+            centerView();
           }}
-          title="Сбросить масштаб"
+          title="По центру (Сбросить масштаб)"
           className="p-1.5 rounded-lg hover:bg-zinc-100 hover:text-zinc-950 transition-all active:scale-95 ml-1"
         >
           <Maximize2 className="w-3.5 h-3.5" />
