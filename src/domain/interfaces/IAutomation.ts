@@ -2,9 +2,9 @@ import { ISmartDevice } from './ISmartDevice';
 import { SimulationContext } from './ISensor';
 
 export interface IAutomationTrigger {
-  readonly type: 'sensor_motion' | 'door_state' | 'temperature' | 'time' | 'person_presence';
+  readonly type: 'sensor_motion' | 'door_state' | 'temperature' | 'time' | 'person_presence' | 'device_state';
   evaluate(context: SimulationContext, devices: Map<string, ISmartDevice>): boolean;
-  getDescription(): string;
+  getDescription(devices?: Map<string, ISmartDevice>): string;
   toJSON(): any;
 }
 

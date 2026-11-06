@@ -74,7 +74,7 @@ export class AutomationEngine {
           automationId: automation.id,
           automationName: automation.name,
           timestamp: now,
-          description: `Сработала автоматизация: "${automation.name}" (${automation.trigger.getDescription()})`,
+          description: `Сработала автоматизация: "${automation.name}" (${automation.trigger.getDescription(devices)})`,
         };
 
         this.logs.unshift(logEntry);

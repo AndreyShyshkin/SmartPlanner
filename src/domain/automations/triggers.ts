@@ -25,10 +25,12 @@ export class MotionTrigger implements IAutomationTrigger {
     return isDetecting === this.mustDetect;
   }
 
-  public getDescription(): string {
+  public getDescription(devices?: Map<string, ISmartDevice>): string {
+    const name = devices?.get(this.deviceId)?.name;
+    const prefix = name ? `Датчик «${name}»` : 'Датчик движения';
     return this.mustDetect
-      ? `Датчик движения зафиксировал активность`
-      : `Датчик движения не фиксирует движения`;
+      ? `${prefix}: засёк человека (обнаружено движение)`
+      : `${prefix}: больше не видит человека (движение прекратилось)`;
   }
 
   public toJSON(): MotionTriggerData {
@@ -63,8 +65,10 @@ export class DoorTrigger implements IAutomationTrigger {
     return isOpen === this.mustBeOpen;
   }
 
-  public getDescription(): string {
-    return this.mustBeOpen ? `Дверь открылась` : `Дверь закрылась`;
+  public getDescription(devices?: Map<string, ISmartDevice>): string {
+    const name = devices?.get(this.deviceId)?.name;
+    const prefix = name ? `Дверь «${name}»` : 'Дверь';
+    return this.mustBeOpen ? `${prefix}: открылась` : `${prefix}: закрылась`;
   }
 
   public toJSON(): DoorTriggerData {
@@ -97,8 +101,10 @@ export class TemperatureTrigger implements IAutomationTrigger {
 
   public evaluate(context: SimulationContext, devices: Map<string, ISmartDevice>): boolean {
     const dev = devices.get(this.deviceId);
-    if (!dev) return false;
-    const currentTemp = (dev.getState() as any).currentTemperature ?? context.ambientTemperature;
+    let currentTemp = context.ambientTemperature;
+    if (dev) {
+      currentTemp = (dev.getState() as any).currentTemperature ?? context.ambientTemperature;
+    }
     if (this.operator === 'greater') {
       return currentTemp > this.threshold;
     } else {
@@ -106,8 +112,9 @@ export class TemperatureTrigger implements IAutomationTrigger {
     }
   }
 
-  public getDescription(): string {
-    return `Температура ${this.operator === 'greater' ? '>' : '<'} ${this.threshold}°C`;
+  public getDescription(devices?: Map<string, ISmartDevice>): string {
+    const name = devices?.get(this.deviceId)?.name || 'Датчик температуры';
+    return `«${name}»: температура ${this.operator === 'greater' ? '>' : '<'} ${this.threshold}°C`;
   }
 
   public toJSON(): TemperatureTriggerData {
@@ -116,6 +123,64 @@ export class TemperatureTrigger implements IAutomationTrigger {
       deviceId: this.deviceId,
       operator: this.operator,
       threshold: this.threshold,
+    };
+  }
+}
+
+export interface DeviceStateTriggerData {
+  type: 'device_state';
+  deviceId: string;
+  property: string;
+  expectedValue: any;
+  label?: string;
+}
+
+export class DeviceStateTrigger implements IAutomationTrigger {
+  public readonly type = 'device_state';
+  public deviceId: string;
+  public property: string;
+  public expectedValue: any;
+  public label?: string;
+
+  constructor(
+    deviceId: string,
+    property: string,
+    expectedValue: any,
+    label?: string
+  ) {
+    this.deviceId = deviceId;
+    this.property = property;
+    this.expectedValue = expectedValue;
+    this.label = label;
+  }
+
+  public evaluate(context: SimulationContext, devices: Map<string, ISmartDevice>): boolean {
+    const dev = devices.get(this.deviceId);
+    if (!dev) return false;
+    const currentState = dev.getState() as any;
+    return currentState[this.property] === this.expectedValue;
+  }
+
+  public getDescription(devices?: Map<string, ISmartDevice>): string {
+    if (this.label) return this.label;
+    const dev = devices?.get(this.deviceId);
+    const devName = dev?.name || 'Устройство';
+    if (this.property === 'isOn') {
+      return `«${devName}»: ${this.expectedValue ? 'включено' : 'выключено'}`;
+    }
+    if (this.property === 'openPercentage') {
+      return `«${devName}»: шторы ${this.expectedValue > 0 ? 'открыты' : 'закрыты'}`;
+    }
+    return `«${devName}»: ${this.property} = ${this.expectedValue}`;
+  }
+
+  public toJSON(): DeviceStateTriggerData {
+    return {
+      type: this.type,
+      deviceId: this.deviceId,
+      property: this.property,
+      expectedValue: this.expectedValue,
+      label: this.label,
     };
   }
 }
@@ -138,7 +203,7 @@ export class PresenceTrigger implements IAutomationTrigger {
   }
 
   public getDescription(): string {
-    return this.isHome ? `Человек вернулся домой` : `Человек ушел из дома`;
+    return this.isHome ? `Человек пришел домой (Дома)` : `Человек ушел из дома (Не дома)`;
   }
 
   public toJSON(): PresenceTriggerData {
@@ -152,37 +217,48 @@ export class PresenceTrigger implements IAutomationTrigger {
 export interface TimeTriggerData {
   type: 'time';
   hour: number;
+  minute?: number;
   comparison: 'after' | 'before' | 'exact';
 }
 
 export class TimeTrigger implements IAutomationTrigger {
   public readonly type = 'time';
   public hour: number;
+  public minute: number;
   public comparison: 'after' | 'before' | 'exact';
 
-  constructor(hour: number, comparison: 'after' | 'before' | 'exact' = 'after') {
+  constructor(
+    hour: number,
+    comparison: 'after' | 'before' | 'exact' = 'after',
+    minute: number = 0
+  ) {
     this.hour = hour;
     this.comparison = comparison;
+    this.minute = minute;
   }
 
   public evaluate(context: SimulationContext): boolean {
+    const targetDec = this.hour + this.minute / 60;
     if (this.comparison === 'after') {
-      return context.timeOfDayHours >= this.hour;
+      return context.timeOfDayHours >= targetDec;
     } else if (this.comparison === 'before') {
-      return context.timeOfDayHours < this.hour;
+      return context.timeOfDayHours < targetDec;
     } else {
-      return Math.floor(context.timeOfDayHours) === Math.floor(this.hour);
+      return Math.abs(context.timeOfDayHours - targetDec) < 0.25;
     }
   }
 
   public getDescription(): string {
-    return `Время суток ${this.comparison === 'after' ? 'после' : 'до'} ${this.hour}:00`;
+    const timeStr = `${String(this.hour).padStart(2, '0')}:${String(this.minute).padStart(2, '0')}`;
+    const compText = this.comparison === 'after' ? 'после' : this.comparison === 'before' ? 'до' : 'ровно в';
+    return `Время суток: ${compText} ${timeStr}`;
   }
 
   public toJSON(): TimeTriggerData {
     return {
       type: this.type,
       hour: this.hour,
+      minute: this.minute,
       comparison: this.comparison,
     };
   }
@@ -196,10 +272,17 @@ export function createTriggerFromJSON(data: any): IAutomationTrigger {
       return new DoorTrigger(data.deviceId, data.mustBeOpen);
     case 'temperature':
       return new TemperatureTrigger(data.deviceId, data.operator, data.threshold);
+    case 'device_state':
+      return new DeviceStateTrigger(
+        data.deviceId,
+        data.property,
+        data.expectedValue,
+        data.label
+      );
     case 'person_presence':
       return new PresenceTrigger(data.isHome);
     case 'time':
-      return new TimeTrigger(data.hour, data.comparison);
+      return new TimeTrigger(data.hour, data.comparison, data.minute);
     default:
       throw new Error(`Unknown trigger type: ${data.type}`);
   }
