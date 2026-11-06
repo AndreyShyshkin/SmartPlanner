@@ -473,16 +473,105 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
       activeDoors,
     };
 
-    // Update sensors
+    // 1. Direct Climate Control: Thermostats manage Radiators & ACs, and update Room Temperatures
+    const roomDeviceMap = new Map<string, any[]>();
+    for (const dev of Array.from(state.devices.values())) {
+      if (dev.roomId) {
+        const list = roomDeviceMap.get(dev.roomId) || [];
+        list.push(dev);
+        roomDeviceMap.set(dev.roomId, list);
+      }
+    }
+
+    for (const room of state.rooms) {
+      const roomDevs = roomDeviceMap.get(room.id) || [];
+      const thermostats = roomDevs.filter((d) => d.type === 'thermostat');
+      const heaters = roomDevs.filter((d) => d.type === 'heater');
+      const acs = roomDevs.filter((d) => d.type === 'ac');
+
+      let currentRoomTemp = room.customTemperature ?? 21.0;
+
+      for (const thermo of thermostats) {
+        const thState = thermo.getState();
+        if (thState.isOn && thState.mode !== 'off' && thState.autoManageClimate !== false) {
+          const targetTemp = thState.targetTemperature;
+          const diff = targetTemp - currentRoomTemp;
+
+          if (thState.mode === 'heat') {
+            if (diff > 0.25) {
+              for (const h of heaters) h.setState({ isOn: true, powerLevel: Math.min(100, Math.max(40, Math.round(diff * 35))) });
+              for (const a of acs) a.setState({ isOn: false });
+              thermo.setState({ climateActionState: 'heating' });
+            } else {
+              for (const h of heaters) h.setState({ isOn: false });
+              thermo.setState({ climateActionState: 'idle' });
+            }
+          } else if (thState.mode === 'cool') {
+            if (diff < -0.25) {
+              for (const a of acs) a.setState({ isOn: true, mode: 'cool', targetTemp: Math.round(targetTemp) });
+              for (const h of heaters) h.setState({ isOn: false });
+              thermo.setState({ climateActionState: 'cooling' });
+            } else {
+              for (const a of acs) a.setState({ isOn: false });
+              thermo.setState({ climateActionState: 'idle' });
+            }
+          } else if (thState.mode === 'auto') {
+            if (diff > 0.3) {
+              for (const h of heaters) h.setState({ isOn: true, powerLevel: Math.min(100, Math.max(40, Math.round(diff * 35))) });
+              for (const a of acs) a.setState({ isOn: false });
+              thermo.setState({ climateActionState: 'heating' });
+            } else if (diff < -0.3) {
+              for (const a of acs) a.setState({ isOn: true, mode: 'cool', targetTemp: Math.round(targetTemp) });
+              for (const h of heaters) h.setState({ isOn: false });
+              thermo.setState({ climateActionState: 'cooling' });
+            } else {
+              for (const h of heaters) h.setState({ isOn: false });
+              for (const a of acs) a.setState({ isOn: false });
+              thermo.setState({ climateActionState: 'idle' });
+            }
+          }
+        } else if (!thState.isOn || thState.mode === 'off') {
+          thermo.setState({ climateActionState: 'idle' });
+        }
+      }
+
+      // 2. Physical Thermal Dynamics of the Room
+      let heatingContribution = 0;
+      for (const h of heaters) {
+        if (h.getState().isOn) {
+          heatingContribution += 0.08 * ((h.getState().powerLevel || 80) / 100);
+        }
+      }
+      for (const a of acs) {
+        if (a.getState().isOn) {
+          if (a.getState().mode === 'cool') {
+            heatingContribution -= 0.08;
+          } else if (a.getState().mode === 'heat') {
+            heatingContribution += 0.08;
+          }
+        }
+      }
+
+      // Heat exchange with ambient outdoor temperature (slow natural leakage)
+      const ambientLeakage = (state.ambientTemperature - currentRoomTemp) * 0.015;
+      currentRoomTemp = Math.round((currentRoomTemp + heatingContribution + ambientLeakage) * 10) / 10;
+      room.customTemperature = currentRoomTemp;
+
+      for (const thermo of thermostats) {
+        thermo.setState({ currentTemperature: currentRoomTemp });
+      }
+    }
+
+    // 3. Update sensors
     let anySensorChanged = false;
-    for (const dev of state.devices.values()) {
+    for (const dev of Array.from(state.devices.values())) {
       if ('evaluate' in dev && typeof (dev as any).evaluate === 'function') {
         const changed = (dev as any).evaluate(simContext);
         if (changed) anySensorChanged = true;
       }
     }
 
-    // Run automations engine
+    // 4. Run automations engine (Edge-triggered, no infinite loops!)
     automationEngine.evaluate(simContext, state.devices, (sceneId) => {
       get().triggerScene(sceneId);
     });
@@ -643,7 +732,23 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
       x: 12,
       y: 9.5,
       roomId: 'room_living',
-      state: { isOn: true, powerLevel: 70 },
+      state: { isOn: false, powerLevel: 70 },
+    });
+    const ac1 = DeviceFactory.createDevice('ac', {
+      id: 'ac_living',
+      name: 'Кондиционер в гостиной',
+      x: 3.5,
+      y: 9.5,
+      roomId: 'room_living',
+      state: { isOn: false, targetTemp: 22, mode: 'cool' },
+    });
+    const thermoLiving = DeviceFactory.createDevice('thermostat', {
+      id: 'thermo_living',
+      name: 'Термостат гостиной',
+      x: 7.5,
+      y: 3.5,
+      roomId: 'room_living',
+      state: { targetTemperature: 22.0, currentTemperature: 21.0, mode: 'auto', autoManageClimate: true },
     });
 
     // Bedroom devices
@@ -661,7 +766,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
       x: 21.5,
       y: 3.5,
       roomId: 'room_bedroom',
-      state: { targetTemperature: 21.5, currentTemperature: 21.0 },
+      state: { targetTemperature: 21.5, currentTemperature: 21.0, mode: 'auto', autoManageClimate: true },
     });
 
     // Door sensor
@@ -674,7 +779,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
       state: { doorId: 'door_1' },
     });
 
-    for (const d of [light1, motion1, curtains1, heater1, light2, thermo1, doorSensor1]) {
+    for (const d of [light1, motion1, curtains1, heater1, ac1, thermoLiving, light2, thermo1, doorSensor1]) {
       devices.set(d.id, d);
     }
 

@@ -13,6 +13,7 @@ export interface AutomationLogEntry {
 export class AutomationEngine {
   private automations: Map<string, Automation> = new Map();
   private lastTriggerTimes: Map<string, number> = new Map();
+  private previousTriggerStates: Map<string, boolean> = new Map();
   private logs: AutomationLogEntry[] = [];
   private onLogCallback?: (log: AutomationLogEntry) => void;
 
@@ -37,11 +38,13 @@ export class AutomationEngine {
 
   public clearLogs(): void {
     this.logs = [];
+    this.previousTriggerStates.clear();
   }
 
   /**
    * Evaluates all enabled automations against the current simulation state.
-   * If a trigger matches and cooldown has elapsed (e.g. 1.5 seconds), executes actions.
+   * Uses Edge-Triggering (fires on false -> true state transition) to prevent
+   * infinite spamming while conditions stay true.
    */
   public evaluate(
     context: SimulationContext,
@@ -51,16 +54,16 @@ export class AutomationEngine {
     const now = Date.now();
 
     for (const automation of Array.from(this.automations.values())) {
-      if (!automation.isEnabled) continue;
-
-      const lastFired = this.lastTriggerTimes.get(automation.id) || 0;
-      // 1500ms cooldown to avoid firing every simulation frame
-      if (now - lastFired < 1500) {
+      if (!automation.isEnabled) {
+        this.previousTriggerStates.delete(automation.id);
         continue;
       }
 
-      const shouldTrigger = automation.trigger.evaluate(context, devices);
-      if (shouldTrigger) {
+      const wasActive = this.previousTriggerStates.get(automation.id) ?? false;
+      const isActive = automation.trigger.evaluate(context, devices);
+
+      // Edge-triggered execution: only fires when the condition BECOMES true!
+      if (isActive && !wasActive) {
         this.lastTriggerTimes.set(automation.id, now);
         automation.lastTriggeredAt = now;
 
@@ -84,6 +87,9 @@ export class AutomationEngine {
           this.onLogCallback(logEntry);
         }
       }
+
+      // Store current state for next tick comparison
+      this.previousTriggerStates.set(automation.id, isActive);
     }
   }
 }

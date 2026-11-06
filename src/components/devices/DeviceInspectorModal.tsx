@@ -40,6 +40,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
   const {
     rooms,
     doors,
+    devices,
     deviceGroups,
     updateDevice,
     deleteDevice,
@@ -49,6 +50,10 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
 
   const state = device.getState();
   const room = rooms.find((r) => r.id === device.roomId);
+
+  const roomClimateDevices = Array.from(devices.values()).filter(
+    (d) => d.roomId === device.roomId && (d.type === 'heater' || d.type === 'ac')
+  );
 
   const handleStateChange = (patch: Record<string, any>) => {
     updateDevice(device.id, { state: patch });
@@ -277,11 +282,34 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
           {/* 4. Thermostat Controls */}
           {device.type === 'thermostat' && (
             <div className="bg-zinc-50 p-4 rounded-2xl border border-black/5 space-y-4">
+              {/* Climate Action Status Banner */}
+              {state.isOn && state.mode !== 'off' && (
+                <div
+                  className={`p-3 rounded-xl border text-xs font-medium flex items-center gap-2 ${
+                    state.climateActionState === 'heating'
+                      ? 'bg-orange-50 border-orange-200 text-orange-900'
+                      : state.climateActionState === 'cooling'
+                      ? 'bg-cyan-50 border-cyan-200 text-cyan-900'
+                      : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                  }`}
+                >
+                  {state.climateActionState === 'heating' && (
+                    <span>🔥 <strong>Обогрев активен</strong>: термостат включил батарею для достижения {state.targetTemperature}°C</span>
+                  )}
+                  {state.climateActionState === 'cooling' && (
+                    <span>❄️ <strong>Охлаждение активно</strong>: термостат включил кондиционер для снижения до {state.targetTemperature}°C</span>
+                  )}
+                  {(state.climateActionState === 'idle' || !state.climateActionState) && (
+                    <span>✨ <strong>Комфорт</strong>: целевая температура {state.targetTemperature}°C достигнута (приборы в режиме ожидания)</span>
+                  )}
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-700">
                   Целевая температура: {state.targetTemperature}°C
                 </span>
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs font-semibold text-zinc-500 bg-white px-2.5 py-1 rounded-lg border border-black/5">
                   Текущая: {state.currentTemperature?.toFixed(1) || 21}°C
                 </span>
               </div>
@@ -298,23 +326,79 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
               />
 
               <div>
-                <label className="text-xs font-semibold text-zinc-500 mb-1 block">
-                  Режим работы
+                <label className="text-xs font-semibold text-zinc-500 mb-1.5 block">
+                  Режим работы климата
                 </label>
                 <div className="grid grid-cols-4 gap-1.5">
-                  {['off', 'heat', 'cool', 'auto'].map((mode) => (
+                  {[
+                    { id: 'auto', label: 'Авто' },
+                    { id: 'heat', label: 'Нагрев' },
+                    { id: 'cool', label: 'Охлажд.' },
+                    { id: 'off', label: 'Выкл' },
+                  ].map((item) => (
                     <button
-                      key={mode}
-                      onClick={() => handleStateChange({ mode, isOn: mode !== 'off' })}
-                      className={`py-1.5 rounded-lg text-xs font-semibold uppercase ${
-                        state.mode === mode
+                      key={item.id}
+                      onClick={() => handleStateChange({ mode: item.id, isOn: item.id !== 'off' })}
+                      className={`py-2 rounded-xl text-xs font-semibold transition-all ${
+                        state.mode === item.id
                           ? 'bg-[#0071E3] text-white shadow-xs'
                           : 'bg-white border border-black/10 text-zinc-600 hover:bg-zinc-100'
                       }`}
                     >
-                      {mode}
+                      {item.label}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* Direct Link with Radiators & AC */}
+              <div className="pt-3 border-t border-black/5 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-xs font-bold text-zinc-800">
+                      Прямая связь с батареями и кондиционером
+                    </h4>
+                    <p className="text-[11px] text-zinc-400">
+                      Термостат сам регулирует мощность приборов для поддержания температуры
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={state.autoManageClimate !== false}
+                    onChange={(e) => handleStateChange({ autoManageClimate: e.target.checked })}
+                    className="w-4 h-4 rounded text-[#0071E3] focus:ring-[#0071E3]"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  {roomClimateDevices.length === 0 ? (
+                    <p className="text-[11px] text-zinc-400 italic bg-white p-2.5 rounded-xl border border-black/5">
+                      💡 В этой комнате пока нет батарей или кондиционеров. Добавьте их на план комнаты «{room?.name || 'этой'}», и термостат свяжется с ними автоматически.
+                    </p>
+                  ) : (
+                    roomClimateDevices.map((cd) => (
+                      <div
+                        key={cd.id}
+                        className="px-3 py-2 bg-white rounded-xl border border-black/5 flex items-center justify-between text-xs"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span>{cd.type === 'heater' ? '♨️' : '❄️'}</span>
+                          <span className="font-semibold text-zinc-800">{cd.name}</span>
+                        </div>
+                        <span
+                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${
+                            cd.getState().isOn
+                              ? cd.type === 'heater'
+                                ? 'bg-orange-100 text-orange-700'
+                                : 'bg-cyan-100 text-cyan-700'
+                              : 'bg-zinc-100 text-zinc-500'
+                          }`}
+                        >
+                          {cd.getState().isOn ? 'Активно' : 'Ожидание'}
+                        </span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -377,13 +461,16 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
             <div className="bg-zinc-50 p-4 rounded-2xl border border-black/5 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-700 flex items-center gap-1.5">
-                  <Wind className="w-4 h-4 text-cyan-500" /> Охлаждение: {state.targetTemp}°C
+                  <Wind className="w-4 h-4 text-cyan-500" /> Целевая температура: {state.targetTemp}°C
+                </span>
+                <span className="text-xs font-semibold text-zinc-500">
+                  {state.isOn ? 'Включен' : 'Выключен'}
                 </span>
               </div>
               <input
                 type="range"
                 min="16"
-                max="28"
+                max="30"
                 step="1"
                 value={state.targetTemp || 21}
                 onChange={(e) =>
@@ -391,6 +478,39 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
                 }
                 className="w-full accent-[#0071E3]"
               />
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-500 mb-1 block">
+                    Режим кондиционера
+                  </label>
+                  <select
+                    value={state.mode || 'cool'}
+                    onChange={(e) => handleStateChange({ mode: e.target.value })}
+                    className="w-full px-2.5 py-1.5 bg-white border border-black/10 rounded-xl text-xs font-semibold"
+                  >
+                    <option value="cool">❄️ Охлаждение</option>
+                    <option value="heat">🔥 Обогрев</option>
+                    <option value="fan">💨 Вентиляция</option>
+                    <option value="dry">💧 Осушение</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-500 mb-1 block">
+                    Скорость обдува
+                  </label>
+                  <select
+                    value={state.fanSpeed || 'medium'}
+                    onChange={(e) => handleStateChange({ fanSpeed: e.target.value })}
+                    className="w-full px-2.5 py-1.5 bg-white border border-black/10 rounded-xl text-xs font-semibold"
+                  >
+                    <option value="low">Тихий (Low)</option>
+                    <option value="medium">Средний (Med)</option>
+                    <option value="high">Сильный (High)</option>
+                    <option value="turbo">Турбо (Turbo)</option>
+                  </select>
+                </div>
+              </div>
             </div>
           )}
         </div>

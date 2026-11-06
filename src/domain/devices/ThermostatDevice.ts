@@ -8,6 +8,9 @@ export interface ThermostatState extends BaseDeviceState {
   currentTemperature: number; // in Celsius, e.g. 20.0
   mode: 'off' | 'heat' | 'cool' | 'auto';
   ecoMode: boolean;
+  autoManageClimate: boolean;
+  linkedDeviceIds?: string[];
+  climateActionState?: 'idle' | 'heating' | 'cooling';
 }
 
 export class ThermostatDevice
@@ -29,6 +32,9 @@ export class ThermostatDevice
       currentTemperature: 21.0,
       mode: 'auto',
       ecoMode: false,
+      autoManageClimate: true,
+      linkedDeviceIds: [],
+      climateActionState: 'idle',
       ...state,
     };
     super(id, name, 'thermostat', x, y, defaultState, roomId, groupId, isEnabled);
@@ -36,7 +42,7 @@ export class ThermostatDevice
 
   public executeCommand(command: string, payload?: any): void {
     if (command === 'turnOn') this.setState({ isOn: true });
-    else if (command === 'turnOff') this.setState({ isOn: false, mode: 'off' });
+    else if (command === 'turnOff') this.setState({ isOn: false, mode: 'off', climateActionState: 'idle' });
     else if (command === 'toggle') this.toggle();
     else if (command === 'setTargetTemperature' && typeof payload === 'number') {
       this.setState({ targetTemperature: Math.max(10, Math.min(32, payload)) });
@@ -54,8 +60,14 @@ export class ThermostatDevice
   }
 
   public getStatusSummary(): string {
-    if (!this.state.isOn || this.state.mode === 'off') return 'Off';
-    return `${this.state.currentTemperature.toFixed(1)}°C → ${this.state.targetTemperature.toFixed(1)}°C`;
+    if (!this.state.isOn || this.state.mode === 'off') return 'Выкл';
+    const actionBadge =
+      this.state.climateActionState === 'heating'
+        ? '🔥 Греет'
+        : this.state.climateActionState === 'cooling'
+        ? '❄️ Охлаждает'
+        : '✨ Комфорт';
+    return `${this.state.currentTemperature.toFixed(1)}°C → ${this.state.targetTemperature.toFixed(1)}°C (${actionBadge})`;
   }
 
   public getIconName(): string {

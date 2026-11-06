@@ -194,15 +194,20 @@ export const SimulationCanvas: React.FC = () => {
       ctx.textAlign = 'center';
       ctx.fillText(room.name, center.x * CELL_SIZE, center.y * CELL_SIZE - 6);
 
-      // Temperature indicator in room
-      const roomThermostats = Array.from(devices.values()).filter(
-        (d) => d.roomId === room.id && (d.type === 'thermostat' || d.type === 'heater')
+      // Live Room Temperature & Climate Action Badge
+      const liveTemp = room.customTemperature ?? 21.0;
+      const roomThermostat = Array.from(devices.values()).find(
+        (d) => d.roomId === room.id && d.type === 'thermostat'
       );
-      const tempText = roomThermostats.length > 0 ? '🌡️ 22.0°C' : '';
-      if (tempText) {
-        ctx.font = '500 10px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.fillText(tempText, center.x * CELL_SIZE, center.y * CELL_SIZE + 8);
-      }
+      const actionBadge = (roomThermostat?.getState() as any)?.climateActionState;
+      let tempSuffix = '';
+      if (actionBadge === 'heating') tempSuffix = ' 🔥 Обогрев';
+      else if (actionBadge === 'cooling') tempSuffix = ' ❄️ Охлаждение';
+      else if (roomThermostat && (roomThermostat.getState() as any).isOn) tempSuffix = ' ✨ Комфорт';
+
+      const tempText = `🌡️ ${liveTemp.toFixed(1)}°C${tempSuffix}`;
+      ctx.font = '500 10px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillText(tempText, center.x * CELL_SIZE, center.y * CELL_SIZE + 8);
     }
 
     // 2. Draw Motion Sensors Raycast Vision Field (Occluded by walls!)
@@ -351,6 +356,32 @@ export const SimulationCanvas: React.FC = () => {
         const grad = ctx.createRadialGradient(dx, dy, 5, dx, dy, radius);
         grad.addColorStop(0, state.color ? state.color + '90' : 'rgba(255, 214, 10, 0.6)');
         grad.addColorStop(1, 'rgba(255, 214, 10, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(dx, dy, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Dynamic heater warmth aura if heater is on
+      if (dev.type === 'heater' && state.isOn) {
+        const radius = CELL_SIZE * 1.8;
+        const grad = ctx.createRadialGradient(dx, dy, 4, dx, dy, radius);
+        grad.addColorStop(0, 'rgba(255, 106, 0, 0.45)');
+        grad.addColorStop(0.6, 'rgba(255, 69, 0, 0.18)');
+        grad.addColorStop(1, 'rgba(255, 69, 0, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(dx, dy, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Dynamic AC cool breeze aura if AC is on
+      if (dev.type === 'ac' && state.isOn) {
+        const radius = CELL_SIZE * 2.2;
+        const grad = ctx.createRadialGradient(dx, dy, 4, dx, dy, radius);
+        grad.addColorStop(0, 'rgba(0, 180, 255, 0.45)');
+        grad.addColorStop(0.6, 'rgba(0, 122, 255, 0.18)');
+        grad.addColorStop(1, 'rgba(0, 122, 255, 0)');
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.arc(dx, dy, radius, 0, Math.PI * 2);
