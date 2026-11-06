@@ -44,13 +44,19 @@ export const PlannerCanvas: React.FC = () => {
   const [currentHoverCell, setCurrentHoverCell] = useState<Point2D | null>(null);
   const [currentHoverRaw, setCurrentHoverRaw] = useState<Point2D | null>(null);
 
+  // Click vs Drag discrimination
+  const [pointerDownScreenPos, setPointerDownScreenPos] = useState<Point2D | null>(null);
+  const [hasMovedSignificantly, setHasMovedSignificantly] = useState(false);
+
   // Room dragging state
   const [dragRoomId, setDragRoomId] = useState<string | null>(null);
   const [dragRoomStartOffset, setDragRoomStartOffset] = useState<Point2D | null>(null);
+  const [candidateRoomId, setCandidateRoomId] = useState<string | null>(null);
 
   // Device dragging state in planner
   const [dragDeviceId, setDragDeviceId] = useState<string | null>(null);
   const [dragDeviceOffset, setDragDeviceOffset] = useState<Point2D | null>(null);
+  const [candidateDeviceId, setCandidateDeviceId] = useState<string | null>(null);
 
   // Canvas panning state
   const [isPanning, setIsPanning] = useState(false);
@@ -328,7 +334,7 @@ export const PlannerCanvas: React.FC = () => {
     // 5. Draw Devices in Planner mode
     for (const dev of Array.from(devices.values())) {
       const isSelected = selectedEntity.type === 'device' && selectedEntity.id === dev.id;
-      const isDragging = dragDeviceId === dev.id;
+      const isDragging = dragDeviceId === dev.id && hasMovedSignificantly;
       const dx = dev.x * CELL_SIZE;
       const dy = dev.y * CELL_SIZE;
 
@@ -336,7 +342,7 @@ export const PlannerCanvas: React.FC = () => {
 
       // Outer glow for selected or dragging device
       if (isDragging) {
-        ctx.shadowColor = 'rgba(0, 113, 227, 0.6)';
+        ctx.shadowColor = 'rgba(0, 113, 227, 0.7)';
         ctx.shadowBlur = 18;
       } else if (isSelected) {
         ctx.shadowColor = '#0071E3';
@@ -570,6 +576,7 @@ export const PlannerCanvas: React.FC = () => {
     personPosition,
     placingDeviceType,
     dragDeviceId,
+    hasMovedSignificantly,
     dragStartCell,
     currentHoverCell,
     currentHoverRaw,
@@ -580,6 +587,8 @@ export const PlannerCanvas: React.FC = () => {
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const { cell, raw } = pixelToGrid(e.clientX, e.clientY);
     setIsPointerDown(true);
+    setPointerDownScreenPos({ x: e.clientX, y: e.clientY });
+    setHasMovedSignificantly(false);
 
     // 1. Device Placement Mode Active
     if (placingDeviceType) {
@@ -651,7 +660,7 @@ export const PlannerCanvas: React.FC = () => {
         setSelectedEntity({ type: 'door', id: door.id });
       }
     } else if (activeTool === 'select') {
-      // 1. Check if clicked on a device -> Enable Dragging in Planner!
+      // 1. Check if clicked on a device
       let clickedDev: string | null = null;
       for (const dev of Array.from(devices.values())) {
         if (dev.containsPoint(raw)) {
@@ -661,10 +670,12 @@ export const PlannerCanvas: React.FC = () => {
       }
 
       if (clickedDev) {
-        setSelectedEntity({ type: 'device', id: clickedDev });
+        // Candidate for click or drag
+        setCandidateDeviceId(clickedDev);
         setDragDeviceId(clickedDev);
         const dev = devices.get(clickedDev)!;
         setDragDeviceOffset({ x: raw.x - dev.x, y: raw.y - dev.y });
+        // NOTE: Do not set selectedEntity here yet, wait for pointerUp to distinguish click vs drag!
         return;
       }
 
@@ -675,12 +686,13 @@ export const PlannerCanvas: React.FC = () => {
         return;
       }
 
-      // 3. Check if clicked on a room -> Enable room move
+      // 3. Check if clicked on a room
       const clickedRoom = WallDetector.findRoomAtPoint(rooms, cell);
       if (clickedRoom) {
-        setSelectedEntity({ type: 'room', id: clickedRoom.id });
+        setCandidateRoomId(clickedRoom.id);
         setDragRoomId(clickedRoom.id);
         setDragRoomStartOffset({ x: cell.x, y: cell.y });
+        // NOTE: Do not set selectedEntity here yet, wait for pointerUp!
       } else {
         setSelectedEntity({ type: null, id: null });
       }
@@ -702,12 +714,27 @@ export const PlannerCanvas: React.FC = () => {
 
     if (!isPointerDown) return;
 
-    // Dragging device in Planner mode
+    // Check if pointer moved beyond drag threshold (5 pixels)
+    if (pointerDownScreenPos && !hasMovedSignificantly) {
+      const dist = Math.hypot(e.clientX - pointerDownScreenPos.x, e.clientY - pointerDownScreenPos.y);
+      if (dist > 5) {
+        setHasMovedSignificantly(true);
+      }
+    }
+
+    // Dragging device in Planner mode (only if moved significantly)
     if (activeTool === 'select' && dragDeviceId && dragDeviceOffset) {
-      const newX = raw.x - dragDeviceOffset.x;
-      const newY = raw.y - dragDeviceOffset.y;
-      moveDevice(dragDeviceId, newX, newY);
-      return;
+      const dist = pointerDownScreenPos
+        ? Math.hypot(e.clientX - pointerDownScreenPos.x, e.clientY - pointerDownScreenPos.y)
+        : 0;
+
+      if (dist > 5 || hasMovedSignificantly) {
+        setHasMovedSignificantly(true);
+        const newX = raw.x - dragDeviceOffset.x;
+        const newY = raw.y - dragDeviceOffset.y;
+        moveDevice(dragDeviceId, newX, newY);
+        return;
+      }
     }
 
     // Brush painting
@@ -722,11 +749,18 @@ export const PlannerCanvas: React.FC = () => {
         }
       }
     } else if (activeTool === 'select' && dragRoomId && dragRoomStartOffset) {
-      const dx = cell.x - dragRoomStartOffset.x;
-      const dy = cell.y - dragRoomStartOffset.y;
-      if (dx !== 0 || dy !== 0) {
-        moveRoom(dragRoomId, dx, dy);
-        setDragRoomStartOffset({ x: cell.x, y: cell.y });
+      const dist = pointerDownScreenPos
+        ? Math.hypot(e.clientX - pointerDownScreenPos.x, e.clientY - pointerDownScreenPos.y)
+        : 0;
+
+      if (dist > 5 || hasMovedSignificantly) {
+        setHasMovedSignificantly(true);
+        const dx = cell.x - dragRoomStartOffset.x;
+        const dy = cell.y - dragRoomStartOffset.y;
+        if (dx !== 0 || dy !== 0) {
+          moveRoom(dragRoomId, dx, dy);
+          setDragRoomStartOffset({ x: cell.x, y: cell.y });
+        }
       }
     }
   };
@@ -738,18 +772,38 @@ export const PlannerCanvas: React.FC = () => {
       return;
     }
 
-    // If device was dragged in Planner, snap cleanly
-    if (dragDeviceId) {
-      const dev = devices.get(dragDeviceId);
-      if (dev) {
-        const snappedX = Math.round(dev.x * 2) / 2;
-        const snappedY = Math.round(dev.y * 2) / 2;
-        moveDevice(dragDeviceId, snappedX, snappedY);
+    // 1. Device Interaction: Distinguish Click vs Drag
+    if (candidateDeviceId) {
+      if (hasMovedSignificantly) {
+        // User dragged the device! Snap cleanly to 0.5 step, do NOT open the settings modal.
+        const dev = devices.get(candidateDeviceId);
+        if (dev) {
+          const snappedX = Math.round(dev.x * 2) / 2;
+          const snappedY = Math.round(dev.y * 2) / 2;
+          moveDevice(candidateDeviceId, snappedX, snappedY);
+        }
+      } else {
+        // User simple-clicked (tapped) the device -> Open Settings Inspector Modal!
+        setSelectedEntity({ type: 'device', id: candidateDeviceId });
       }
+
+      setCandidateDeviceId(null);
       setDragDeviceId(null);
       setDragDeviceOffset(null);
     }
 
+    // 2. Room Interaction: Distinguish Click vs Drag
+    if (candidateRoomId) {
+      if (!hasMovedSignificantly) {
+        // User simple-clicked on room -> Open Room Inspector
+        setSelectedEntity({ type: 'room', id: candidateRoomId });
+      }
+      setCandidateRoomId(null);
+      setDragRoomId(null);
+      setDragRoomStartOffset(null);
+    }
+
+    // 3. Rectangle Room Creation
     if (activeTool === 'room_rect' && dragStartCell && currentHoverCell) {
       const minX = Math.min(dragStartCell.x, currentHoverCell.x);
       const maxX = Math.max(dragStartCell.x, currentHoverCell.x);
@@ -771,8 +825,8 @@ export const PlannerCanvas: React.FC = () => {
 
     setIsPointerDown(false);
     setDragStartCell(null);
-    setDragRoomId(null);
-    setDragRoomStartOffset(null);
+    setPointerDownScreenPos(null);
+    setHasMovedSignificantly(false);
   };
 
   return (
@@ -813,7 +867,7 @@ export const PlannerCanvas: React.FC = () => {
             ? 'grabbing'
             : placingDeviceType
             ? 'crosshair'
-            : dragDeviceId
+            : dragDeviceId && hasMovedSignificantly
             ? 'grabbing'
             : activeTool === 'select'
             ? 'default'
