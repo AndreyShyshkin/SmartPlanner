@@ -6,7 +6,7 @@ import { ISmartDevice } from '../domain/interfaces/ISmartDevice';
 import { DeviceFactory } from '../domain/devices/DeviceFactory';
 import { Scene } from '../domain/automations/Scene';
 import { Automation } from '../domain/automations/Automation';
-import { MotionTrigger } from '../domain/automations/triggers';
+import { MotionTrigger, DoorTrigger } from '../domain/automations/triggers';
 import { SetDeviceStateAction } from '../domain/automations/actions';
 import { AutomationEngine, AutomationLogEntry } from '../domain/automations/AutomationEngine';
 import { WallDetector } from '../domain/layout/WallDetector';
@@ -647,39 +647,136 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
   },
 
   loadTemplate: (templateName) => {
-    if (templateName === 'empty') {
+    if (templateName === 'studio') {
+      // Modern Studio with Living Area, Hallway, and Bathroom
+      const studioTiles: Point2D[] = [];
+      for (let x = 4; x <= 14; x++) {
+        for (let y = 4; y <= 13; y++) {
+          studioTiles.push({ x, y });
+        }
+      }
+      const bathTiles: Point2D[] = [];
+      for (let x = 15; x <= 19; x++) {
+        for (let y = 4; y <= 8; y++) {
+          bathTiles.push({ x, y });
+        }
+      }
+      const hallTiles: Point2D[] = [];
+      for (let x = 15; x <= 19; x++) {
+        for (let y = 9; y <= 13; y++) {
+          hallTiles.push({ x, y });
+        }
+      }
+
+      const studioRoom = new Room('room_studio', 'Студия', '#0071E3', studioTiles);
+      const bathRoom = new Room('room_bath', 'Ванная', '#AF52DE', bathTiles);
+      const hallRoom = new Room('room_hall', 'Прихожая', '#34C759', hallTiles);
+      const rooms = [studioRoom, bathRoom, hallRoom];
+
+      const doorStudioHall = new Door('door_s1', 15, 11, 'vertical', false, 'Вход в комнату', ['room_studio', 'room_hall']);
+      const doorBathHall = new Door('door_s2', 17, 9, 'horizontal', false, 'Дверь в ванную', ['room_bath', 'room_hall']);
+      const doorEntrance = new Door('door_s3', 17, 14, 'horizontal', false, 'Входная дверь', ['room_hall']);
+      const doors = [doorStudioHall, doorBathHall, doorEntrance];
+
+      const devices = new Map<string, ISmartDevice>();
+      const lightStudio = DeviceFactory.createDevice('light', {
+        id: 'light_s_main',
+        name: 'Люстра в студии',
+        x: 9,
+        y: 8.5,
+        roomId: 'room_studio',
+        state: { isOn: true, brightness: 90, color: '#FFD60A' },
+      });
+      const lightHall = DeviceFactory.createDevice('light', {
+        id: 'light_s_hall',
+        name: 'Свет в прихожей',
+        x: 17,
+        y: 11,
+        roomId: 'room_hall',
+        state: { isOn: true, brightness: 70, color: '#FFFFFF' },
+      });
+      const thermoS = DeviceFactory.createDevice('thermostat', {
+        id: 'thermo_s',
+        name: 'Термостат студии',
+        x: 9,
+        y: 4.5,
+        roomId: 'room_studio',
+        state: { targetTemperature: 22.0, currentTemperature: 21.0, mode: 'auto', autoManageClimate: true },
+      });
+      const acS = DeviceFactory.createDevice('ac', {
+        id: 'ac_s',
+        name: 'Кондиционер',
+        x: 4.5,
+        y: 12.5,
+        roomId: 'room_studio',
+        state: { isOn: false, targetTemp: 22, mode: 'cool' },
+      });
+      const motionHall = DeviceFactory.createDevice('motion', {
+        id: 'motion_s_hall',
+        name: 'Датчик движения',
+        x: 18.5,
+        y: 9.5,
+        roomId: 'room_hall',
+        state: { detectionRadius: 4, fovAngle: 100, rotationAngle: 210 },
+      });
+      const doorSensorEnt = DeviceFactory.createDevice('door_sensor', {
+        id: 'doorsensor_s_ent',
+        name: 'Датчик входной двери',
+        x: 17,
+        y: 14,
+        roomId: 'room_hall',
+        state: { doorId: 'door_s3' },
+      });
+
+      for (const d of [lightStudio, lightHall, thermoS, acS, motionHall, doorSensorEnt]) {
+        devices.set(d.id, d);
+      }
+
       set({
-        rooms: [],
-        doors: [],
-        devices: new Map(),
+        rooms,
+        doors,
+        devices,
         scenes: [],
         automations: [],
-        selectedEntity: { type: null, id: null },
+        personPosition: { x: 17, y: 12 },
+        isPersonHome: true,
+        timeOfDayHours: 14,
+        ambientTemperature: 21.0,
       });
       return;
     }
 
     // Default template: Beautiful 2-Room Smart Apartment
+    // 1. Гостиная (Living Room): x: 3..12, y: 3..10 (width 10, height 8) = 20 m²
     const livingTiles: Point2D[] = [];
     for (let x = 3; x <= 12; x++) {
       for (let y = 3; y <= 10; y++) {
         livingTiles.push({ x, y });
       }
     }
+
+    // 2. Спальня (Bedroom): x: 13..21, y: 3..10 (width 9, height 8) = 18 m²
+    // Прямой стык с гостиной по стене x=13 без зазоров!
     const bedroomTiles: Point2D[] = [];
-    for (let x = 14; x <= 22; x++) {
+    for (let x = 13; x <= 21; x++) {
       for (let y = 3; y <= 10; y++) {
         bedroomTiles.push({ x, y });
       }
     }
+
+    // 3. Кухня (Kitchen): x: 3..12, y: 11..17 (width 10, height 7) = 17.5 m²
+    // Прямой стык с гостиной по стене y=11 без зазоров!
     const kitchenTiles: Point2D[] = [];
     for (let x = 3; x <= 12; x++) {
-      for (let y = 12; y <= 17; y++) {
+      for (let y = 11; y <= 17; y++) {
         kitchenTiles.push({ x, y });
       }
     }
+
+    // 4. Прихожая (Hallway / Entry): x: 13..17, y: 11..17 (width 5, height 7) = 8.75 m²
+    // Прямой стык с кухней по стене x=13 и со спальней по стене y=11 без зазоров!
     const hallwayTiles: Point2D[] = [];
-    for (let x = 13; x <= 15; x++) {
+    for (let x = 13; x <= 17; x++) {
       for (let y = 11; y <= 17; y++) {
         hallwayTiles.push({ x, y });
       }
@@ -692,11 +789,13 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
 
     const rooms = [livingRoom, bedroom, kitchen, hallway];
 
-    // Doors on walls
-    const door1 = new Door('door_1', 13, 6, 'vertical', false, 'Дверь в гостиную', ['room_living', 'room_hallway']);
-    const door2 = new Door('door_2', 14, 6, 'vertical', false, 'Дверь в спальню', ['room_bedroom', 'room_hallway']);
-    const door3 = new Door('door_3', 7, 11, 'horizontal', false, 'Вход на кухню', ['room_kitchen', 'room_living']);
-    const doors = [door1, door2, door3];
+    // Doors on walls - единые двери без зазоров и двери в прихожей:
+    const door1 = new Door('door_1', 13, 6, 'vertical', false, 'Дверь Гостиная — Спальня', ['room_living', 'room_bedroom']);
+    const door2 = new Door('door_2', 7, 11, 'horizontal', false, 'Дверь Гостиная — Кухня', ['room_living', 'room_kitchen']);
+    const door3 = new Door('door_3', 13, 14, 'vertical', false, 'Дверь Прихожая — Кухня', ['room_kitchen', 'room_hallway']);
+    const door4 = new Door('door_4', 15, 11, 'horizontal', false, 'Дверь Прихожая — Спальня', ['room_bedroom', 'room_hallway']);
+    const door5 = new Door('door_5', 15, 18, 'horizontal', false, 'Входная дверь', ['room_hallway']);
+    const doors = [door1, door2, door3, door4, door5];
 
     // Devices
     const devices = new Map<string, ISmartDevice>();
@@ -721,8 +820,8 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const curtains1 = DeviceFactory.createDevice('curtains', {
       id: 'curtains_living',
       name: 'Шторы в гостиной',
-      x: 12,
-      y: 6,
+      x: 3.5,
+      y: 6.5,
       roomId: 'room_living',
       state: { openPercentage: 80 },
     });
@@ -755,7 +854,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const light2 = DeviceFactory.createDevice('light', {
       id: 'light_bed',
       name: 'Свет в спальне',
-      x: 18,
+      x: 17,
       y: 6.5,
       roomId: 'room_bedroom',
       state: { isOn: false, brightness: 50, color: '#FF3B30' },
@@ -763,23 +862,71 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const thermo1 = DeviceFactory.createDevice('thermostat', {
       id: 'thermo_bed',
       name: 'Климат спальни',
-      x: 21.5,
-      y: 3.5,
+      x: 19.5,
+      y: 4.5,
       roomId: 'room_bedroom',
       state: { targetTemperature: 21.5, currentTemperature: 21.0, mode: 'auto', autoManageClimate: true },
     });
 
-    // Door sensor
-    const doorSensor1 = DeviceFactory.createDevice('door_sensor', {
-      id: 'doorsensor_1',
-      name: 'Датчик двери гостиной',
-      x: 13,
-      y: 6,
-      roomId: 'room_living',
-      state: { doorId: 'door_1' },
+    // Kitchen devices
+    const lightKitchen = DeviceFactory.createDevice('light', {
+      id: 'light_kitchen',
+      name: 'Подсветка кухни',
+      x: 7.5,
+      y: 14.5,
+      roomId: 'room_kitchen',
+      state: { isOn: true, brightness: 80, color: '#FFD60A' },
     });
 
-    for (const d of [light1, motion1, curtains1, heater1, ac1, thermoLiving, light2, thermo1, doorSensor1]) {
+    // Hallway devices
+    const lightHallway = DeviceFactory.createDevice('light', {
+      id: 'light_hallway',
+      name: 'Свет в прихожей',
+      x: 15.5,
+      y: 14.5,
+      roomId: 'room_hallway',
+      state: { isOn: true, brightness: 75, color: '#FFFFFF' },
+    });
+    const motionHallway = DeviceFactory.createDevice('motion', {
+      id: 'motion_hallway',
+      name: 'Датчик движения (Прихожая)',
+      x: 16.5,
+      y: 12.5,
+      roomId: 'room_hallway',
+      state: { detectionRadius: 4, fovAngle: 110, rotationAngle: 210 },
+    });
+    const doorSensorEntrance = DeviceFactory.createDevice('door_sensor', {
+      id: 'doorsensor_entrance',
+      name: 'Датчик входной двери',
+      x: 15,
+      y: 18,
+      roomId: 'room_hallway',
+      state: { doorId: 'door_5' },
+    });
+    const doorSensorBed = DeviceFactory.createDevice('door_sensor', {
+      id: 'doorsensor_bed',
+      name: 'Датчик двери спальни',
+      x: 15,
+      y: 11,
+      roomId: 'room_hallway',
+      state: { doorId: 'door_4' },
+    });
+
+    for (const d of [
+      light1,
+      motion1,
+      curtains1,
+      heater1,
+      ac1,
+      thermoLiving,
+      light2,
+      thermo1,
+      lightKitchen,
+      lightHallway,
+      motionHallway,
+      doorSensorEntrance,
+      doorSensorBed,
+    ]) {
       devices.set(d.id, d);
     }
 
@@ -787,9 +934,11 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
     const nightScene = new Scene('scene_night', 'Спокойной ночи', 'Moon', '#5856D6', [
       { deviceId: 'light_living', statePatch: { isOn: false } },
       { deviceId: 'light_bed', statePatch: { isOn: true, brightness: 20, color: '#FF9500' } },
+      { deviceId: 'light_hallway', statePatch: { isOn: false } },
       { deviceId: 'curtains_living', statePatch: { openPercentage: 0 } },
     ]);
     const welcomeScene = new Scene('scene_welcome', 'Я дома', 'Sun', '#FF9500', [
+      { deviceId: 'light_hallway', statePatch: { isOn: true, brightness: 100, color: '#FFFFFF' } },
       { deviceId: 'light_living', statePatch: { isOn: true, brightness: 100, color: '#FFFFFF' } },
       { deviceId: 'curtains_living', statePatch: { openPercentage: 100 } },
     ]);
@@ -802,8 +951,14 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
       new MotionTrigger('motion_living', true),
       [new SetDeviceStateAction('light_living', { isOn: true, brightness: 100 })]
     );
+    const autoEntrance = new Automation(
+      'auto_2',
+      'Включить свет в прихожей при входе',
+      new DoorTrigger('doorsensor_entrance', true),
+      [new SetDeviceStateAction('light_hallway', { isOn: true, brightness: 100 })]
+    );
 
-    const automations = [autoMotion];
+    const automations = [autoMotion, autoEntrance];
     automationEngine.setAutomations(automations);
 
     set({
@@ -812,7 +967,7 @@ export const usePlannerStore = create<PlannerStoreState>((set, get) => ({
       devices,
       scenes,
       automations,
-      personPosition: { x: 7, y: 6 },
+      personPosition: { x: 15.5, y: 15.5 },
       isPersonHome: true,
       timeOfDayHours: 12,
       ambientTemperature: 21.5,

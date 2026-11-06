@@ -12,7 +12,7 @@ export class Raycaster {
   ): boolean {
     for (const wall of walls) {
       // If wall has a door and door is currently open, light/sensor beam can pass through
-      if (wall.isDoor) {
+      if (wall.isDoor && wall.isDoorOpen) {
         continue;
       }
 

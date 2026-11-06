@@ -60,4 +60,5 @@ export interface WallSegment {
   endY: number;
   isDoor?: boolean;
   doorId?: string;
+  isDoorOpen?: boolean;
 }

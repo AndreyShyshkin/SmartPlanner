@@ -263,11 +263,7 @@ export const PlannerCanvas: React.FC = () => {
 
       if (door.orientation === 'horizontal') {
         // Horizontal Door
-        ctx.clearRect(0, -3, CELL_SIZE, 6);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, -3, CELL_SIZE, 6);
-
-        // Frame posts
+        // Frame posts at wall ends
         ctx.fillStyle = isSelected ? '#0071E3' : isDoorSensorPlacing ? '#34C759' : '#1D1D1F';
         ctx.fillRect(-2, -3, 4, 6);
         ctx.fillRect(CELL_SIZE - 2, -3, 4, 6);
@@ -297,10 +293,7 @@ export const PlannerCanvas: React.FC = () => {
         }
       } else {
         // Vertical Door
-        ctx.clearRect(-3, 0, 6, CELL_SIZE);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(-3, 0, 6, CELL_SIZE);
-
+        // Frame posts at wall ends
         ctx.fillStyle = isSelected ? '#0071E3' : isDoorSensorPlacing ? '#34C759' : '#1D1D1F';
         ctx.fillRect(-3, -2, 6, 4);
         ctx.fillRect(-3, CELL_SIZE - 2, 6, 4);

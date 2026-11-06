@@ -279,9 +279,6 @@ export const SimulationCanvas: React.FC = () => {
       ctx.translate(x, y);
 
       if (door.orientation === 'horizontal') {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, -4, CELL_SIZE, 8);
-
         ctx.fillStyle = '#1D1D1F';
         ctx.fillRect(-2, -4, 4, 8);
         ctx.fillRect(CELL_SIZE - 2, -4, 4, 8);
@@ -309,9 +306,6 @@ export const SimulationCanvas: React.FC = () => {
           ctx.stroke();
         }
       } else {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(-4, 0, 8, CELL_SIZE);
-
         ctx.fillStyle = '#1D1D1F';
         ctx.fillRect(-4, -2, 8, 4);
         ctx.fillRect(-4, CELL_SIZE - 2, 8, 4);

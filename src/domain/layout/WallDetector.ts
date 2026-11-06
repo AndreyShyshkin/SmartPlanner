@@ -68,8 +68,9 @@ export class WallDetector {
           startY: y,
           endX: x + 1,
           endY: y,
-          isDoor: !!door && door.isOpen,
+          isDoor: !!door,
           doorId: door?.id,
+          isDoorOpen: door?.isOpen,
         });
       }
 
@@ -82,8 +83,9 @@ export class WallDetector {
           startY: y + 1,
           endX: x + 1,
           endY: y + 1,
-          isDoor: !!door && door.isOpen,
+          isDoor: !!door,
           doorId: door?.id,
+          isDoorOpen: door?.isOpen,
         });
       }
 
@@ -96,8 +98,9 @@ export class WallDetector {
           startY: y,
           endX: x,
           endY: y + 1,
-          isDoor: !!door && door.isOpen,
+          isDoor: !!door,
           doorId: door?.id,
+          isDoorOpen: door?.isOpen,
         });
       }
 
@@ -110,8 +113,9 @@ export class WallDetector {
           startY: y,
           endX: x + 1,
           endY: y + 1,
-          isDoor: !!door && door.isOpen,
+          isDoor: !!door,
           doorId: door?.id,
+          isDoorOpen: door?.isOpen,
         });
       }
     }
