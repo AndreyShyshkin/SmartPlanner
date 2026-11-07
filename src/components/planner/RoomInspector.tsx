@@ -35,7 +35,7 @@ export const RoomInspector: React.FC = () => {
             className="w-3.5 h-3.5 rounded-full ring-2 ring-black/10"
             style={{ backgroundColor: room.color }}
           />
-          <h3 className="font-semibold text-zinc-900 text-sm">Свойства комнаты</h3>
+          <h3 className="font-semibold text-zinc-900 text-sm">Властивості кімнати</h3>
         </div>
         <button
           onClick={() => setSelectedEntity({ type: null, id: null })}
@@ -49,13 +49,13 @@ export const RoomInspector: React.FC = () => {
         {/* Name input */}
         <div>
           <label className="text-xs font-medium text-zinc-500 mb-1.5 flex items-center gap-1.5">
-            <Type className="w-3.5 h-3.5" /> Название
+            <Type className="w-3.5 h-3.5" /> Назва
           </label>
           <input
             type="text"
             value={room.name}
             onChange={(e) => updateRoom(room.id, { name: e.target.value })}
-            placeholder="Например: Спальня"
+            placeholder="Наприклад: Спальня"
             className="w-full px-3 py-2 bg-zinc-50 border border-black/10 rounded-xl text-sm font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#0071E3] transition-all"
           />
         </div>
@@ -63,7 +63,7 @@ export const RoomInspector: React.FC = () => {
         {/* Color picker */}
         <div>
           <label className="text-xs font-medium text-zinc-500 mb-2 flex items-center gap-1.5">
-            <Palette className="w-3.5 h-3.5" /> Цвет подсветки
+            <Palette className="w-3.5 h-3.5" /> Колір підсвічування
           </label>
           <div className="grid grid-cols-4 gap-2">
             {PALETTE.map((c) => (
@@ -83,25 +83,25 @@ export const RoomInspector: React.FC = () => {
         <div className="bg-zinc-50 rounded-xl p-3 border border-black/5 flex items-center justify-between">
           <div className="flex items-center gap-2 text-zinc-500 text-xs">
             <Square className="w-4 h-4 text-zinc-400" />
-            <span>Площадь</span>
+            <span>Площа</span>
           </div>
           <span className="font-semibold text-sm text-zinc-800">{areaSqMeters} м²</span>
         </div>
 
         <div className="text-xs text-zinc-400 italic">
-          💡 Подсказка: зажмите и потяните комнату на холсте, чтобы переместить её вместе с устройствами.
+          💡 Підказка: затисніть і потягніть кімнату на полотні, щоб перемістити її разом із пристроями.
         </div>
 
         {/* Delete Room Button */}
         <button
           onClick={() => {
-            if (confirm(`Удалить комнату "${room.name}"?`)) {
+            if (confirm(`Видалити кімнату "${room.name}"?`)) {
               deleteRoom(room.id);
             }
           }}
           className="w-full mt-2 py-2.5 px-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-colors active:scale-[0.98]"
         >
-          <Trash2 className="w-4 h-4" /> Удалить комнату
+          <Trash2 className="w-4 h-4" /> Видалити кімнату
         </button>
       </div>
     </div>

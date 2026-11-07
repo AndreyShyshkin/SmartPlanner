@@ -48,27 +48,27 @@ export const PlannerToolbar: React.FC = () => {
   const tools: { id: PlannerTool; label: string; icon: React.ReactNode }[] = [
     {
       id: 'select',
-      label: 'Выбор и перемещение',
+      label: 'Вибір та переміщення',
       icon: <MousePointer className="w-5 h-5" />,
     },
     {
       id: 'room_rect',
-      label: 'Комната областью (прямоугольник)',
+      label: 'Кімната областю (прямокутник)',
       icon: <SquareDashed className="w-5 h-5" />,
     },
     {
       id: 'brush',
-      label: 'Кисть (точечное рисование)',
+      label: 'Пензель (точкове малювання)',
       icon: <Paintbrush className="w-5 h-5" />,
     },
     {
       id: 'eraser',
-      label: 'Ластик (точечное удаление)',
+      label: 'Гумка (точкове видалення)',
       icon: <Eraser className="w-5 h-5" />,
     },
     {
       id: 'door',
-      label: 'Добавить дверь (только на стены)',
+      label: 'Додати двері (тільки на стіни)',
       icon: <DoorOpen className="w-5 h-5" />,
     },
   ];
@@ -101,10 +101,10 @@ export const PlannerToolbar: React.FC = () => {
         <button
           onClick={() => setIsCatalogOpen(true)}
           className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#0071E3] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 shadow-xs"
-          title="Добавить умное устройство на план"
+          title="Додати розумний пристрій на план"
         >
           <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span>Устройство</span>
+          <span>Пристрій</span>
         </button>
       </div>
 
@@ -113,7 +113,7 @@ export const PlannerToolbar: React.FC = () => {
         <div className="flex items-center gap-1 border-r border-black/10 pr-3 animate-fadeIn">
           <button
             onClick={() => setDoorOrientation('horizontal')}
-            title="Горизонтальная дверь"
+            title="Горизонтальні двері"
             className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
               doorOrientation === 'horizontal'
                 ? 'bg-zinc-900 text-white'
@@ -124,7 +124,7 @@ export const PlannerToolbar: React.FC = () => {
           </button>
           <button
             onClick={() => setDoorOrientation('vertical')}
-            title="Вертикальная дверь"
+            title="Вертикальні двері"
             className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
               doorOrientation === 'vertical'
                 ? 'bg-zinc-900 text-white'
@@ -156,7 +156,7 @@ export const PlannerToolbar: React.FC = () => {
       <div className="flex items-center gap-1 text-zinc-600">
         <button
           onClick={() => setZoom(zoom - 0.15)}
-          title="Отдалить"
+          title="Віддалити"
           className="p-1.5 rounded-lg hover:bg-zinc-100 hover:text-zinc-950 transition-all active:scale-95"
         >
           <ZoomOut className="w-4 h-4" />
@@ -166,7 +166,7 @@ export const PlannerToolbar: React.FC = () => {
         </span>
         <button
           onClick={() => setZoom(zoom + 0.15)}
-          title="Приблизить"
+          title="Наблизити"
           className="p-1.5 rounded-lg hover:bg-zinc-100 hover:text-zinc-950 transition-all active:scale-95"
         >
           <ZoomIn className="w-4 h-4" />
@@ -176,7 +176,7 @@ export const PlannerToolbar: React.FC = () => {
             setZoom(1);
             centerView();
           }}
-          title="По центру (Сбросить масштаб)"
+          title="По центру (Скинути масштаб)"
           className="p-1.5 rounded-lg hover:bg-zinc-100 hover:text-zinc-950 transition-all active:scale-95 ml-1"
         >
           <Maximize2 className="w-3.5 h-3.5" />

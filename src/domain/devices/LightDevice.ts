@@ -40,7 +40,7 @@ export class LightDevice extends BaseDevice<LightState> implements IControllable
   }
 
   public getStatusSummary(): string {
-    if (!this.state.isOn) return 'Off';
+    if (!this.state.isOn) return 'Вимкнено';
     return `${this.state.brightness}% • ${this.state.color}`;
   }
 

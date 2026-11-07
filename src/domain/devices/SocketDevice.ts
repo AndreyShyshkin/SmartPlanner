@@ -36,7 +36,7 @@ export class SocketDevice extends BaseDevice<SocketState> implements IControllab
   }
 
   public getStatusSummary(): string {
-    if (!this.state.isOn) return 'Off';
+    if (!this.state.isOn) return 'Вимкнено';
     return `${this.state.powerWatts} W`;
   }
 

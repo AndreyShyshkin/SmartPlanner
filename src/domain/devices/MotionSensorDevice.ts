@@ -87,8 +87,8 @@ export class MotionSensorDevice extends BaseDevice<MotionSensorState> implements
   }
 
   public getStatusSummary(): string {
-    if (!this.state.isOn) return 'Disabled';
-    return this.state.isDetecting ? 'Motion Detected' : 'Clear';
+    if (!this.state.isOn) return 'Вимкнено';
+    return this.state.isDetecting ? 'Виявлено рух' : 'Спокійно';
   }
 
   public getIconName(): string {

@@ -51,7 +51,7 @@ export class ACDevice extends BaseDevice<ACState> implements IControllable, ITem
   }
 
   public getStatusSummary(): string {
-    if (!this.state.isOn) return 'Off';
+    if (!this.state.isOn) return 'Вимкнено';
     return `${this.state.mode.toUpperCase()} • ${this.state.targetTemp}°C`;
   }
 

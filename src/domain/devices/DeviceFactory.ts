@@ -85,16 +85,16 @@ export class DeviceFactory {
 
   public static getDefaultName(type: DeviceType): string {
     const names: Record<DeviceType, string> = {
-      light: 'Лампа',
-      motion: 'Датчик движения',
-      door_sensor: 'Датчик открытия',
+      light: 'Розумна лампа',
+      motion: 'Датчик руху',
+      door_sensor: 'Датчик відкриття',
       thermostat: 'Термостат',
-      heater: 'Умная батарея',
-      curtains: 'Умные шторы',
-      ac: 'Кондиционер',
-      socket: 'Умная розетка',
+      heater: 'Розумний радіатор',
+      curtains: 'Розумні штори',
+      ac: 'Кондиціонер',
+      socket: 'Розумна розетка',
     };
-    return names[type] || 'Устройство';
+    return names[type] || 'Пристрій';
   }
 
   public static getSupportedTypes(): DeviceType[] {

@@ -60,12 +60,12 @@ export class ThermostatDevice
   }
 
   public getStatusSummary(): string {
-    if (!this.state.isOn || this.state.mode === 'off') return 'Выкл';
+    if (!this.state.isOn || this.state.mode === 'off') return 'Вимкнено';
     const actionBadge =
       this.state.climateActionState === 'heating'
-        ? '🔥 Греет'
+        ? '🔥 Гріє'
         : this.state.climateActionState === 'cooling'
-        ? '❄️ Охлаждает'
+        ? '❄️ Охолоджує'
         : '✨ Комфорт';
     return `${this.state.currentTemperature.toFixed(1)}°C → ${this.state.targetTemperature.toFixed(1)}°C (${actionBadge})`;
   }

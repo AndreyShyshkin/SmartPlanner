@@ -34,9 +34,9 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const tabs: { id: AppTab; label: string; icon: React.ReactNode }[] = [
-    { id: 'planner', label: 'Планировка', icon: <LayoutGrid className="w-4 h-4" /> },
-    { id: 'devices', label: 'Умные устройства', icon: <Cpu className="w-4 h-4" /> },
-    { id: 'simulation', label: 'Симуляция', icon: <PlayCircle className="w-4 h-4" /> },
+    { id: 'planner', label: 'Планування', icon: <LayoutGrid className="w-4 h-4" /> },
+    { id: 'devices', label: 'Розумні пристрої', icon: <Cpu className="w-4 h-4" /> },
+    { id: 'simulation', label: 'Симуляція', icon: <PlayCircle className="w-4 h-4" /> },
   ];
 
   const handleExport = () => {
@@ -61,9 +61,9 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
       const content = event.target?.result as string;
       const success = loadProjectJSON(content);
       if (success) {
-        alert('Проект успешно загружен!');
+        alert('Проєкт успішно завантажено!');
       } else {
-        alert('Ошибка при чтении файла проекта JSON.');
+        alert('Помилка під час читання файлу проєкту JSON.');
       }
     };
     reader.readAsText(file);
@@ -76,7 +76,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
       <div className="flex items-center gap-3">
         <button
           onClick={onBackToWelcome}
-          title="Вернуться на главный экран"
+          title="Повернутися на головний екран"
           className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-zinc-100 transition-all text-zinc-900 group"
         >
           <div className="w-8 h-8 rounded-xl bg-[#0071E3] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
@@ -128,21 +128,21 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         {/* Import JSON */}
         <button
           onClick={() => fileInputRef.current?.click()}
-          title="Загрузить проект из JSON"
+          title="Завантажити проєкт з JSON"
           className="p-2 text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors"
         >
           <Upload className="w-4 h-4" />
-          <span className="hidden md:inline">Загрузить</span>
+          <span className="hidden md:inline">Завантажити</span>
         </button>
 
         {/* Export JSON */}
         <button
           onClick={handleExport}
-          title="Сохранить проект в JSON"
+          title="Зберегти проєкт у JSON"
           className="px-3.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs active:scale-95"
         >
           <Download className="w-3.5 h-3.5" />
-          <span>Экспорт JSON</span>
+          <span>Експорт JSON</span>
         </button>
       </div>
     </header>

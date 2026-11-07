@@ -27,10 +27,10 @@ export class MotionTrigger implements IAutomationTrigger {
 
   public getDescription(devices?: Map<string, ISmartDevice>): string {
     const name = devices?.get(this.deviceId)?.name;
-    const prefix = name ? `Датчик «${name}»` : 'Датчик движения';
+    const prefix = name ? `Датчик «${name}»` : 'Датчик руху';
     return this.mustDetect
-      ? `${prefix}: засёк человека (обнаружено движение)`
-      : `${prefix}: больше не видит человека (движение прекратилось)`;
+      ? `${prefix}: виявив людину (рух зафіксовано)`
+      : `${prefix}: більше не бачить людину (рух припинився)`;
   }
 
   public toJSON(): MotionTriggerData {
@@ -67,8 +67,8 @@ export class DoorTrigger implements IAutomationTrigger {
 
   public getDescription(devices?: Map<string, ISmartDevice>): string {
     const name = devices?.get(this.deviceId)?.name;
-    const prefix = name ? `Дверь «${name}»` : 'Дверь';
-    return this.mustBeOpen ? `${prefix}: открылась` : `${prefix}: закрылась`;
+    const prefix = name ? `Двері «${name}»` : 'Двері';
+    return this.mustBeOpen ? `${prefix}: відчинилися` : `${prefix}: зачинилися`;
   }
 
   public toJSON(): DoorTriggerData {
@@ -113,7 +113,7 @@ export class TemperatureTrigger implements IAutomationTrigger {
   }
 
   public getDescription(devices?: Map<string, ISmartDevice>): string {
-    const name = devices?.get(this.deviceId)?.name || 'Датчик температуры';
+    const name = devices?.get(this.deviceId)?.name || 'Датчик температури';
     return `«${name}»: температура ${this.operator === 'greater' ? '>' : '<'} ${this.threshold}°C`;
   }
 
@@ -164,12 +164,12 @@ export class DeviceStateTrigger implements IAutomationTrigger {
   public getDescription(devices?: Map<string, ISmartDevice>): string {
     if (this.label) return this.label;
     const dev = devices?.get(this.deviceId);
-    const devName = dev?.name || 'Устройство';
+    const devName = dev?.name || 'Пристрій';
     if (this.property === 'isOn') {
-      return `«${devName}»: ${this.expectedValue ? 'включено' : 'выключено'}`;
+      return `«${devName}»: ${this.expectedValue ? 'увімкнено' : 'вимкнено'}`;
     }
     if (this.property === 'openPercentage') {
-      return `«${devName}»: шторы ${this.expectedValue > 0 ? 'открыты' : 'закрыты'}`;
+      return `«${devName}»: штори ${this.expectedValue > 0 ? 'відкриті' : 'закриті'}`;
     }
     return `«${devName}»: ${this.property} = ${this.expectedValue}`;
   }
@@ -203,7 +203,7 @@ export class PresenceTrigger implements IAutomationTrigger {
   }
 
   public getDescription(): string {
-    return this.isHome ? `Человек пришел домой (Дома)` : `Человек ушел из дома (Не дома)`;
+    return this.isHome ? `Людина повернулася додому (Вдома)` : `Людина пішла з дому (Поза домом)`;
   }
 
   public toJSON(): PresenceTriggerData {
@@ -250,8 +250,8 @@ export class TimeTrigger implements IAutomationTrigger {
 
   public getDescription(): string {
     const timeStr = `${String(this.hour).padStart(2, '0')}:${String(this.minute).padStart(2, '0')}`;
-    const compText = this.comparison === 'after' ? 'после' : this.comparison === 'before' ? 'до' : 'ровно в';
-    return `Время суток: ${compText} ${timeStr}`;
+    const compText = this.comparison === 'after' ? 'після' : this.comparison === 'before' ? 'до' : 'рівно о';
+    return `Час доби: ${compText} ${timeStr}`;
   }
 
   public toJSON(): TimeTriggerData {

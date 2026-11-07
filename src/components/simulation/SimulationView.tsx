@@ -60,11 +60,11 @@ export const SimulationView: React.FC = () => {
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-white/90 backdrop-blur-xl border border-black/10 px-4 py-2 rounded-2xl shadow-apple flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5 text-zinc-700 font-medium">
             <span className="p-1 bg-blue-50 text-blue-600 rounded-md font-bold">WASD</span>
-            или перетаскивайте человечка мышкой
+            або перетягуйте чоловічка мишкою
           </div>
           <span className="text-zinc-300">|</span>
           <div className="flex items-center gap-1.5 text-zinc-500">
-            Клик по устройству или двери на плане переключает их
+            Клік по пристрою або дверях на плані перемикає їх
           </div>
         </div>
 
@@ -90,7 +90,7 @@ export const SimulationView: React.FC = () => {
         <div className="w-full md:w-80 flex flex-col justify-between border-r border-black/5 pr-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
-              Параметры симуляции
+              Параметри симуляції
             </span>
             {/* Person Presence Toggle */}
             <button
@@ -106,11 +106,11 @@ export const SimulationView: React.FC = () => {
             >
               {isPersonHome ? (
                 <>
-                  <User className="w-3.5 h-3.5" /> Человек дома
+                  <User className="w-3.5 h-3.5" /> Людина вдома
                 </>
               ) : (
                 <>
-                  <UserX className="w-3.5 h-3.5" /> Вне дома
+                  <UserX className="w-3.5 h-3.5" /> Поза домом
                 </>
               )}
             </button>
@@ -120,7 +120,7 @@ export const SimulationView: React.FC = () => {
           <div className="mt-2 space-y-1">
             <div className="flex items-center justify-between text-xs">
               <span className="font-medium text-zinc-600 flex items-center gap-1.5">
-                <Sun className="w-3.5 h-3.5 text-amber-500" /> Время суток
+                <Sun className="w-3.5 h-3.5 text-amber-500" /> Час доби
               </span>
               <span className="font-bold text-zinc-900">
                 {String(Math.floor(timeOfDayHours)).padStart(2, '0')}:
@@ -142,10 +142,10 @@ export const SimulationView: React.FC = () => {
             {/* Quick time presets */}
             <div className="flex items-center justify-between pt-0.5">
               {[
-                { h: 7, label: 'Утро', icon: <Sunrise className="w-3 h-3 text-orange-400" /> },
+                { h: 7, label: 'Ранок', icon: <Sunrise className="w-3 h-3 text-orange-400" /> },
                 { h: 14, label: 'День', icon: <Sun className="w-3 h-3 text-amber-500" /> },
-                { h: 19, label: 'Вечер', icon: <Sunset className="w-3 h-3 text-rose-500" /> },
-                { h: 23, label: 'Ночь', icon: <Moon className="w-3 h-3 text-indigo-400" /> },
+                { h: 19, label: 'Вечір', icon: <Sunset className="w-3 h-3 text-rose-500" /> },
+                { h: 23, label: 'Ніч', icon: <Moon className="w-3 h-3 text-indigo-400" /> },
               ].map((p) => (
                 <button
                   key={p.h}
@@ -169,7 +169,7 @@ export const SimulationView: React.FC = () => {
           <div className="mt-2">
             <div className="flex items-center justify-between text-xs">
               <span className="font-medium text-zinc-600 flex items-center gap-1.5">
-                <Thermometer className="w-3.5 h-3.5 text-rose-500" /> Температура на улице
+                <Thermometer className="w-3.5 h-3.5 text-rose-500" /> Вулична температура
               </span>
               <span className="font-bold text-zinc-900">{ambientTemperature.toFixed(1)}°C</span>
             </div>
@@ -194,12 +194,12 @@ export const SimulationView: React.FC = () => {
             <div className="flex items-center gap-2">
               <History className="w-4 h-4 text-[#0071E3]" />
               <span className="text-xs font-bold text-zinc-800">
-                Журнал событий автоматизаций (Live Feed)
+                Журнал подій автоматизацій (Live Feed)
               </span>
             </div>
             <button
               onClick={clearSimulationLogs}
-              title="Очистить журнал"
+              title="Очистити журнал"
               className="p-1 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -209,7 +209,7 @@ export const SimulationView: React.FC = () => {
           <div className="flex-1 overflow-y-auto space-y-1.5 py-1.5 pr-2">
             {simulationLogs.length === 0 ? (
               <p className="text-xs text-zinc-400 italic py-2">
-                События пока не происходили. Попробуйте переместить человечка к датчику движения или открыть дверь!
+                Подій поки не відбувалося. Спробуйте перемістити чоловічка до датчика руху або відчинити двері!
               </p>
             ) : (
               simulationLogs.map((log) => {

@@ -88,7 +88,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
           {/* Rename */}
           <div>
             <label className="text-xs font-semibold text-zinc-500 mb-1.5 block">
-              Название устройства
+              Назва пристрою
             </label>
             <input
               type="text"
@@ -102,7 +102,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-semibold text-zinc-500 mb-1.5 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5" /> Комната
+                <MapPin className="w-3.5 h-3.5" /> Кімната
               </label>
               <select
                 value={device.roomId || ''}
@@ -111,7 +111,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
                 }
                 className="w-full px-3 py-2 bg-zinc-50 border border-black/10 rounded-xl text-xs font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#0071E3]"
               >
-                <option value="">Без комнаты</option>
+                <option value="">Без кімнати</option>
                 {rooms.map((r) => (
                   <option key={r.id} value={r.id}>
                     {r.name}
@@ -122,7 +122,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
 
             <div>
               <label className="text-xs font-semibold text-zinc-500 mb-1.5 flex items-center gap-1">
-                <FolderPlus className="w-3.5 h-3.5" /> Группа
+                <FolderPlus className="w-3.5 h-3.5" /> Група
               </label>
               <select
                 value={device.groupId || ''}
@@ -131,7 +131,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
                 }
                 className="w-full px-3 py-2 bg-zinc-50 border border-black/10 rounded-xl text-xs font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#0071E3]"
               >
-                <option value="">Без группы</option>
+                <option value="">Без групи</option>
                 {deviceGroups.map((g) => (
                   <option key={g.id} value={g.id}>
                     {g.name}
@@ -147,10 +147,10 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
             <div className="bg-zinc-50 p-4 rounded-2xl border border-black/5 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-700 flex items-center gap-1.5">
-                  <Sun className="w-4 h-4 text-amber-500" /> Яркость: {state.brightness}%
+                  <Sun className="w-4 h-4 text-amber-500" /> Яскравість: {state.brightness}%
                 </span>
                 <span className="text-xs text-zinc-400">
-                  {state.isOn ? 'Включено' : 'Выключено'}
+                  {state.isOn ? 'Увімкнено' : 'Вимкнено'}
                 </span>
               </div>
               <input
@@ -169,7 +169,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
 
               <div>
                 <label className="text-xs font-semibold text-zinc-500 mb-2 block">
-                  Цвет свечения
+                  Колір світіння
                 </label>
                 <div className="flex items-center gap-2">
                   {COLOR_PRESETS.map((color) => (
@@ -194,7 +194,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
             <div className="bg-zinc-50 p-4 rounded-2xl border border-black/5 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-700 flex items-center gap-1.5">
-                  <Eye className="w-4 h-4 text-blue-500" /> Радиус обнаружения:{' '}
+                  <Eye className="w-4 h-4 text-blue-500" /> Радіус виявлення:{' '}
                   {state.detectionRadius} плиток
                 </span>
               </div>
@@ -213,7 +213,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-semibold text-zinc-500 mb-1 block">
-                    Угол обзора (FOV): {state.fovAngle}°
+                    Кут огляду (FOV): {state.fovAngle}°
                   </label>
                   <select
                     value={state.fovAngle || 360}
@@ -224,13 +224,13 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
                   >
                     <option value={90}>90° (Сектор)</option>
                     <option value={120}>120° (Широкий)</option>
-                    <option value={180}>180° (Полусфера)</option>
-                    <option value={360}>360° (Круговой)</option>
+                    <option value={180}>180° (Півсфера)</option>
+                    <option value={360}>360° (Круговий)</option>
                   </select>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-zinc-500 mb-1 block">
-                    Направление: {state.rotationAngle || 0}°
+                    Напрямок: {state.rotationAngle || 0}°
                   </label>
                   <input
                     type="range"
@@ -247,7 +247,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
               </div>
 
               <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-100 text-[11px] text-blue-700">
-                🛡️ Стены блокируют видимость сенсора (Raycasting). Датчик не видит сквозь непрозрачные стены!
+                🛡️ Стіни блокують видимість сенсора (Raycasting). Датчик не бачить крізь непрозорі стіни!
               </div>
             </div>
           )}
@@ -257,24 +257,24 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
             <div className="bg-zinc-50 p-4 rounded-2xl border border-black/5 space-y-4">
               <div>
                 <label className="text-xs font-semibold text-zinc-500 mb-1.5 block">
-                  Привязанная дверь на плане
+                  Прив’язані двері на плані
                 </label>
                 <select
                   value={state.doorId || ''}
                   onChange={(e) => handleStateChange({ doorId: e.target.value })}
                   className="w-full px-3 py-2 bg-white border border-black/10 rounded-xl text-xs font-medium"
                 >
-                  <option value="">Выберите дверь...</option>
+                  <option value="">Виберіть двері...</option>
                   {doors.map((d) => (
                     <option key={d.id} value={d.id}>
-                      {d.name || 'Дверь'} ({d.x}, {d.y}) - {d.orientation}
+                      {d.name || 'Двері'} ({d.x}, {d.y}) - {d.orientation === 'horizontal' ? 'гориз.' : 'верт.'}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-100 text-[11px] text-amber-800">
-                🚪 Срабатывает автоматически при открытии выбранной двери или при проходе виртуального человека через дверной проем.
+                🚪 Спрацьовує автоматично при відкритті вибраних дверей або під час проходу віртуальної людини через дверний отвір.
               </div>
             </div>
           )}
@@ -294,23 +294,23 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
                   }`}
                 >
                   {state.climateActionState === 'heating' && (
-                    <span>🔥 <strong>Обогрев активен</strong>: термостат включил батарею для достижения {state.targetTemperature}°C</span>
+                    <span>🔥 <strong>Обігрів активний</strong>: термостат увімкнув батарею для досягнення {state.targetTemperature}°C</span>
                   )}
                   {state.climateActionState === 'cooling' && (
-                    <span>❄️ <strong>Охлаждение активно</strong>: термостат включил кондиционер для снижения до {state.targetTemperature}°C</span>
+                    <span>❄️ <strong>Охолодження активне</strong>: термостат увімкнув кондиціонер для зниження до {state.targetTemperature}°C</span>
                   )}
                   {(state.climateActionState === 'idle' || !state.climateActionState) && (
-                    <span>✨ <strong>Комфорт</strong>: целевая температура {state.targetTemperature}°C достигнута (приборы в режиме ожидания)</span>
+                    <span>✨ <strong>Комфорт</strong>: цільову температуру {state.targetTemperature}°C досягнуто (прилади в режимі очікування)</span>
                   )}
                 </div>
               )}
 
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-700">
-                  Целевая температура: {state.targetTemperature}°C
+                  Цільова температура: {state.targetTemperature}°C
                 </span>
                 <span className="text-xs font-semibold text-zinc-500 bg-white px-2.5 py-1 rounded-lg border border-black/5">
-                  Текущая: {state.currentTemperature?.toFixed(1) || 21}°C
+                  Поточна: {state.currentTemperature?.toFixed(1) || 21}°C
                 </span>
               </div>
               <input
@@ -327,14 +327,14 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
 
               <div>
                 <label className="text-xs font-semibold text-zinc-500 mb-1.5 block">
-                  Режим работы климата
+                  Режим роботи клімату
                 </label>
                 <div className="grid grid-cols-4 gap-1.5">
                   {[
                     { id: 'auto', label: 'Авто' },
-                    { id: 'heat', label: 'Нагрев' },
-                    { id: 'cool', label: 'Охлажд.' },
-                    { id: 'off', label: 'Выкл' },
+                    { id: 'heat', label: 'Обігрів' },
+                    { id: 'cool', label: 'Охолодж.' },
+                    { id: 'off', label: 'Вимк' },
                   ].map((item) => (
                     <button
                       key={item.id}
@@ -356,10 +356,10 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="text-xs font-bold text-zinc-800">
-                      Прямая связь с батареями и кондиционером
+                      Прямий зв’язок із батареями та кондиціонером
                     </h4>
                     <p className="text-[11px] text-zinc-400">
-                      Термостат сам регулирует мощность приборов для поддержания температуры
+                      Термостат сам регулює потужність приладів для підтримки температури
                     </p>
                   </div>
                   <input
@@ -373,7 +373,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
                 <div className="space-y-1.5">
                   {roomClimateDevices.length === 0 ? (
                     <p className="text-[11px] text-zinc-400 italic bg-white p-2.5 rounded-xl border border-black/5">
-                      💡 В этой комнате пока нет батарей или кондиционеров. Добавьте их на план комнаты «{room?.name || 'этой'}», и термостат свяжется с ними автоматически.
+                      💡 У цій кімнаті поки немає батарей або кондиціонерів. Додайте їх на план кімнати «{room?.name || 'цієї'}», і термостат зв’яжеться з ними автоматично.
                     </p>
                   ) : (
                     roomClimateDevices.map((cd) => (
@@ -394,7 +394,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
                               : 'bg-zinc-100 text-zinc-500'
                           }`}
                         >
-                          {cd.getState().isOn ? 'Активно' : 'Ожидание'}
+                          {cd.getState().isOn ? 'Активно' : 'Очікування'}
                         </span>
                       </div>
                     ))
@@ -409,7 +409,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
             <div className="bg-zinc-50 p-4 rounded-2xl border border-black/5 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-700 flex items-center gap-1.5">
-                  <Flame className="w-4 h-4 text-red-500" /> Мощность обогрева:{' '}
+                  <Flame className="w-4 h-4 text-red-500" /> Потужність обігріву:{' '}
                   {state.powerLevel}%
                 </span>
               </div>
@@ -435,7 +435,7 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
             <div className="bg-zinc-50 p-4 rounded-2xl border border-black/5 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-700 flex items-center gap-1.5">
-                  <Blinds className="w-4 h-4 text-indigo-500" /> Открытие штор:{' '}
+                  <Blinds className="w-4 h-4 text-indigo-500" /> Відкриття штор:{' '}
                   {state.openPercentage}%
                 </span>
               </div>
@@ -461,10 +461,10 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
             <div className="bg-zinc-50 p-4 rounded-2xl border border-black/5 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-700 flex items-center gap-1.5">
-                  <Wind className="w-4 h-4 text-cyan-500" /> Целевая температура: {state.targetTemp}°C
+                  <Wind className="w-4 h-4 text-cyan-500" /> Цільова температура: {state.targetTemp}°C
                 </span>
                 <span className="text-xs font-semibold text-zinc-500">
-                  {state.isOn ? 'Включен' : 'Выключен'}
+                  {state.isOn ? 'Увімкнено' : 'Вимкнено'}
                 </span>
               </div>
               <input
@@ -482,22 +482,22 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[11px] font-semibold text-zinc-500 mb-1 block">
-                    Режим кондиционера
+                    Режим кондиціонера
                   </label>
                   <select
                     value={state.mode || 'cool'}
                     onChange={(e) => handleStateChange({ mode: e.target.value })}
                     className="w-full px-2.5 py-1.5 bg-white border border-black/10 rounded-xl text-xs font-semibold"
                   >
-                    <option value="cool">❄️ Охлаждение</option>
-                    <option value="heat">🔥 Обогрев</option>
-                    <option value="fan">💨 Вентиляция</option>
-                    <option value="dry">💧 Осушение</option>
+                    <option value="cool">❄️ Охолодження</option>
+                    <option value="heat">🔥 Обігрів</option>
+                    <option value="fan">💨 Вентиляція</option>
+                    <option value="dry">💧 Осушення</option>
                   </select>
                 </div>
                 <div>
                   <label className="text-[11px] font-semibold text-zinc-500 mb-1 block">
-                    Скорость обдува
+                    Швидкість обдуву
                   </label>
                   <select
                     value={state.fanSpeed || 'medium'}
@@ -505,8 +505,8 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
                     className="w-full px-2.5 py-1.5 bg-white border border-black/10 rounded-xl text-xs font-semibold"
                   >
                     <option value="low">Тихий (Low)</option>
-                    <option value="medium">Средний (Med)</option>
-                    <option value="high">Сильный (High)</option>
+                    <option value="medium">Середній (Med)</option>
+                    <option value="high">Сильний (High)</option>
                     <option value="turbo">Турбо (Turbo)</option>
                   </select>
                 </div>
@@ -519,14 +519,14 @@ export const DeviceInspectorModal: React.FC<DeviceInspectorModalProps> = ({
         <div className="pt-4 border-t border-black/5 flex items-center justify-between">
           <button
             onClick={() => {
-              if (confirm(`Удалить устройство "${device.name}"?`)) {
+              if (confirm(`Видалити пристрій "${device.name}"?`)) {
                 deleteDevice(device.id);
                 onClose();
               }
             }}
             className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
-            <Trash2 className="w-4 h-4" /> Удалить устройство
+            <Trash2 className="w-4 h-4" /> Видалити пристрій
           </button>
           <button
             onClick={onClose}

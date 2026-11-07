@@ -84,7 +84,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({ device, onOpenSettings }
             e.stopPropagation();
             toggleDevice(device.id);
           }}
-          title={isOn ? 'Выключить' : 'Включить'}
+          title={isOn ? 'Вимкнути' : 'Увімкнути'}
           className={`p-3 rounded-2xl transition-all duration-300 ${
             isOn
               ? 'bg-zinc-100 shadow-sm active:scale-90 group-hover:scale-105'
@@ -118,7 +118,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({ device, onOpenSettings }
         </h4>
         <div className="flex items-center justify-between mt-1">
           <span className="text-xs text-zinc-500 truncate">
-            {room ? room.name : 'Вне комнаты'}
+            {room ? room.name : 'Поза кімнатою'}
           </span>
           <span className="text-xs font-medium text-zinc-700">
             {device.getStatusSummary()}

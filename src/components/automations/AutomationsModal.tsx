@@ -112,7 +112,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
 
     if (triggerCategory === 'device') {
       if (!currentTriggerDev) {
-        alert('Пожалуйста, выберите устройство для условия');
+        alert('Будь ласка, оберіть пристрій для умови');
         return;
       }
 
@@ -127,7 +127,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
           currentTriggerDev.id,
           'openPercentage',
           curtainEvent === 'open' ? 100 : 0,
-          `«${currentTriggerDev.name}»: шторы ${curtainEvent === 'open' ? 'открыты' : 'закрыты'}`
+          `«${currentTriggerDev.name}»: штори ${curtainEvent === 'open' ? 'відкриті' : 'закриті'}`
         );
       } else {
         // Light, Socket, AC, etc.
@@ -135,7 +135,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
           currentTriggerDev.id,
           'isOn',
           powerEvent === 'on',
-          `«${currentTriggerDev.name}»: ${powerEvent === 'on' ? 'включено' : 'выключено'}`
+          `«${currentTriggerDev.name}»: ${powerEvent === 'on' ? 'увімкнено' : 'вимкнено'}`
         );
       }
     } else if (triggerCategory === 'time') {
@@ -174,7 +174,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
     }
 
     if (actions.length === 0) {
-      alert('Пожалуйста, выберите целевое действие');
+      alert('Будь ласка, оберіть цільову дію');
       return;
     }
 
@@ -201,9 +201,9 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
               <Cpu className="w-5 h-5 text-[#0071E3]" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-zinc-900">Автоматизации умного дома</h2>
+              <h2 className="text-lg font-bold text-zinc-900">Автоматизації розумного будинку</h2>
               <p className="text-xs text-zinc-400">
-                Создание гибких правил ЕСЛИ (Устройство, Время, Человек) → ТО (Действие)
+                Створення гнучких правил ЯКЩО (Пристрій, Час, Людина) → ТО (Дія)
               </p>
             </div>
           </div>
@@ -220,9 +220,9 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
             {automations.length === 0 ? (
               <div className="text-center py-10 bg-zinc-50 rounded-2xl border border-dashed border-black/10">
                 <Cpu className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
-                <p className="text-xs text-zinc-500">Нет созданных автоматизаций</p>
+                <p className="text-xs text-zinc-500">Немає створених автоматизацій</p>
                 <p className="text-[11px] text-zinc-400 mt-1">
-                  Нажмите кнопку ниже, чтобы настроить реакцию на датчики или уход/приход
+                  Натисніть кнопку нижче, щоб налаштувати реакцію на датчики або вихід/прихід
                 </p>
               </div>
             ) : (
@@ -241,7 +241,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                     </div>
                     <div className="flex items-center gap-2 text-xs text-zinc-500 flex-wrap">
                       <span className="font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
-                        ЕСЛИ: {auto.trigger.getDescription(devices)}
+                        ЯКЩО: {auto.trigger.getDescription(devices)}
                       </span>
                       <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
                       <span className="font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
@@ -256,7 +256,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                       className={`p-1 rounded-lg transition-colors ${
                         auto.isEnabled ? 'text-emerald-600' : 'text-zinc-400'
                       }`}
-                      title={auto.isEnabled ? 'Активно' : 'Выключено'}
+                      title={auto.isEnabled ? 'Активно' : 'Вимкнено'}
                     >
                       {auto.isEnabled ? (
                         <ToggleRight className="w-7 h-7" />
@@ -279,7 +279,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
               onClick={() => setIsCreating(true)}
               className="w-full mt-3 py-3 border-2 border-dashed border-black/10 hover:border-[#0071E3] text-zinc-600 hover:text-[#0071E3] rounded-2xl text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
             >
-              <Plus className="w-4 h-4" /> Добавить новую автоматизацию
+              <Plus className="w-4 h-4" /> Додати нову автоматизацію
             </button>
           </div>
         ) : (
@@ -287,14 +287,14 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
             {/* Automation Name */}
             <div>
               <label className="text-xs font-semibold text-zinc-500 mb-1.5 block">
-                Название правила
+                Назва правила
               </label>
               <input
                 type="text"
                 required
                 value={autoName}
                 onChange={(e) => setAutoName(e.target.value)}
-                placeholder="Например: Включить свет когда кто-то вошел в комнату"
+                placeholder="Наприклад: Увімкнути світло, коли хтось зайшов до кімнати"
                 className="w-full px-3 py-2 bg-zinc-50 border border-black/10 rounded-xl text-sm font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#0071E3]"
               />
             </div>
@@ -302,7 +302,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
             {/* 1. IF (TRIGGER SECTION) */}
             <div className="p-4 bg-blue-50/40 rounded-2xl border border-blue-100 space-y-3.5">
               <span className="text-xs font-bold text-blue-700 uppercase tracking-wider block">
-                1. ЕСЛИ (Условие срабатывания)
+                1. ЯКЩО (Умова спрацьовування)
               </span>
 
               {/* 4 Main Category Buttons */}
@@ -310,22 +310,22 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                 {[
                   {
                     id: 'device',
-                    label: 'Устройство',
+                    label: 'Пристрій',
                     icon: <Activity className="w-4 h-4" />,
                   },
                   {
                     id: 'time',
-                    label: 'Время',
+                    label: 'Час',
                     icon: <Clock className="w-4 h-4" />,
                   },
                   {
                     id: 'person_left',
-                    label: 'Человек ушел',
+                    label: 'Людина пішла',
                     icon: <UserX className="w-4 h-4" />,
                   },
                   {
                     id: 'person_arrived',
-                    label: 'Человек пришел',
+                    label: 'Людина прийшла',
                     icon: <UserCheck className="w-4 h-4" />,
                   },
                 ].map((item) => (
@@ -349,7 +349,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                 <div className="space-y-3 pt-2">
                   <div>
                     <label className="text-[11px] font-semibold text-zinc-500 mb-1 block">
-                      Выберите устройство
+                      Оберіть пристрій
                     </label>
                     <select
                       value={selectedTriggerDeviceId}
@@ -360,7 +360,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                         const room = rooms.find((r) => r.id === d.roomId);
                         return (
                           <option key={d.id} value={d.id}>
-                            {d.name} ({room ? room.name : 'Вне комнаты'}) — {d.type}
+                            {d.name} ({room ? room.name : 'Поза кімнатою'}) — {d.type}
                           </option>
                         );
                       })}
@@ -371,7 +371,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                   {currentTriggerDev && (
                     <div className="bg-white p-3 rounded-xl border border-black/5 space-y-2">
                       <span className="text-[11px] font-bold text-zinc-600 uppercase tracking-wider block">
-                        Событие для {currentTriggerDev.name}:
+                        Подія для {currentTriggerDev.name}:
                       </span>
 
                       {/* A. Motion Sensor */}
@@ -386,7 +386,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                                 : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
                             }`}
                           >
-                            <Activity className="w-3.5 h-3.5" /> Засёк человека
+                            <Activity className="w-3.5 h-3.5" /> Виявив людину
                           </button>
                           <button
                             type="button"
@@ -397,7 +397,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                                 : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
                             }`}
                           >
-                            Больше не видит человека
+                            Більше не бачить людину
                           </button>
                         </div>
                       )}
@@ -414,7 +414,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                                 : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
                             }`}
                           >
-                            <DoorOpen className="w-3.5 h-3.5" /> Дверь открылась
+                            <DoorOpen className="w-3.5 h-3.5" /> Двері відчинилися
                           </button>
                           <button
                             type="button"
@@ -425,7 +425,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                                 : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
                             }`}
                           >
-                            Дверь закрылась
+                            Двері зачинилися
                           </button>
                         </div>
                       )}
@@ -436,20 +436,20 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="text-[11px] font-medium text-zinc-500 mb-1 block">
-                              Условие температуры
+                              Умова температури
                             </label>
                             <select
                               value={tempOperator}
                               onChange={(e) => setTempOperator(e.target.value as any)}
                               className="w-full px-2.5 py-1.5 bg-zinc-50 border border-black/10 rounded-xl text-xs font-semibold"
                             >
-                              <option value="greater">Температура больше (&gt;)</option>
-                              <option value="less">Температура меньше (&lt;)</option>
+                              <option value="greater">Температура більша (&gt;)</option>
+                              <option value="less">Температура менша (&lt;)</option>
                             </select>
                           </div>
                           <div>
                             <label className="text-[11px] font-medium text-zinc-500 mb-1 block">
-                              Порог температуры: {tempThreshold}°C
+                              Поріг температури: {tempThreshold}°C
                             </label>
                             <input
                               type="number"
@@ -474,7 +474,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                                 : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
                             }`}
                           >
-                            Шторы открылись
+                            Штори відкрилися
                           </button>
                           <button
                             type="button"
@@ -485,7 +485,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                                 : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
                             }`}
                           >
-                            Шторы закрылись
+                            Штори закрилися
                           </button>
                         </div>
                       )}
@@ -506,7 +506,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                                   : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
                               }`}
                             >
-                              Включилось
+                              Увімкнулося
                             </button>
                             <button
                               type="button"
@@ -517,7 +517,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                                   : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
                               }`}
                             >
-                              Выключилось
+                              Вимкнулося
                             </button>
                           </div>
                         )}
@@ -532,22 +532,22 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-[11px] font-semibold text-zinc-500 mb-1 block">
-                        Условие времени
+                        Умова часу
                       </label>
                       <select
                         value={timeComparison}
                         onChange={(e) => setTimeComparison(e.target.value as any)}
                         className="w-full px-2.5 py-1.5 bg-zinc-50 border border-black/10 rounded-xl text-xs font-semibold"
                       >
-                        <option value="after">После указанного времени</option>
-                        <option value="before">До указанного времени</option>
-                        <option value="exact">Ровно в указанное время</option>
+                        <option value="after">Після вказаного часу</option>
+                        <option value="before">До вказаного часу</option>
+                        <option value="exact">Рівно у вказаний час</option>
                       </select>
                     </div>
 
                     <div>
                       <label className="text-[11px] font-semibold text-zinc-500 mb-1 block">
-                        Время:{' '}
+                        Час:{' '}
                         <span className="font-bold text-[#0071E3]">
                           {String(timeHour).padStart(2, '0')}:
                           {String(timeMinute).padStart(2, '0')}
@@ -561,7 +561,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                           value={timeHour}
                           onChange={(e) => setTimeHour(Math.min(23, Math.max(0, Number(e.target.value))))}
                           className="w-16 px-2 py-1 bg-zinc-50 border border-black/10 rounded-lg text-xs font-semibold text-center"
-                          placeholder="Час"
+                          placeholder="Год"
                         />
                         <span>:</span>
                         <input
@@ -572,7 +572,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                           value={timeMinute}
                           onChange={(e) => setTimeMinute(Math.min(59, Math.max(0, Number(e.target.value))))}
                           className="w-16 px-2 py-1 bg-zinc-50 border border-black/10 rounded-lg text-xs font-semibold text-center"
-                          placeholder="Мин"
+                          placeholder="Хв"
                         />
                       </div>
                     </div>
@@ -587,9 +587,9 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                     <UserX className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-zinc-900">Человек уходит из дома</h4>
+                    <h4 className="text-xs font-bold text-zinc-900">Людина йде з дому</h4>
                     <p className="text-[11px] text-zinc-500 leading-relaxed">
-                      Автоматизация мгновенно сработает, когда в симуляции переключается статус на «Вне дома».
+                      Автоматизація миттєво спрацює, коли в симуляції змінюється статус на «Поза домом».
                     </p>
                   </div>
                 </div>
@@ -602,9 +602,9 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                     <UserCheck className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-zinc-900">Человек возвращается домой</h4>
+                    <h4 className="text-xs font-bold text-zinc-900">Людина повертається додому</h4>
                     <p className="text-[11px] text-zinc-500 leading-relaxed">
-                      Автоматизация мгновенно сработает, когда в симуляции статус становится «Человек дома».
+                      Автоматизація миттєво спрацює, коли в симуляції статус стає «Людина вдома».
                     </p>
                   </div>
                 </div>
@@ -614,14 +614,14 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
             {/* 2. THEN (ACTIONS SECTION) */}
             <div className="p-4 bg-emerald-50/40 rounded-2xl border border-emerald-100 space-y-3.5">
               <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider block">
-                2. ТО (Выполнить действие)
+                2. ТО (Виконати дію)
               </span>
 
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: 'device', label: 'Устройство' },
-                  { id: 'group', label: 'Группа устройств' },
-                  { id: 'scene', label: 'Запустить сценарий' },
+                  { id: 'device', label: 'Пристрій' },
+                  { id: 'group', label: 'Група пристроїв' },
+                  { id: 'scene', label: 'Запустити сценарій' },
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -643,7 +643,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                 <div className="grid grid-cols-2 gap-3 pt-2">
                   <div>
                     <label className="text-[11px] font-semibold text-zinc-500 mb-1 block">
-                      Выберите устройство
+                      Оберіть пристрій
                     </label>
                     <select
                       value={targetDeviceId}
@@ -659,15 +659,15 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                   </div>
                   <div>
                     <label className="text-[11px] font-semibold text-zinc-500 mb-1 block">
-                      Действие
+                      Дія
                     </label>
                     <select
                       value={devicePower ? 'on' : 'off'}
                       onChange={(e) => setDevicePower(e.target.value === 'on')}
                       className="w-full px-2.5 py-1.5 bg-white border border-black/10 rounded-xl text-xs font-medium"
                     >
-                      <option value="on">Включить / Открыть</option>
-                      <option value="off">Выключить / Закрыть</option>
+                      <option value="on">Увімкнути / Відкрити</option>
+                      <option value="off">Вимкнути / Закрити</option>
                     </select>
                   </div>
                 </div>
@@ -678,7 +678,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                 <div className="grid grid-cols-2 gap-3 pt-2">
                   <div>
                     <label className="text-[11px] font-semibold text-zinc-500 mb-1 block">
-                      Группа устройств
+                      Група пристроїв
                     </label>
                     <select
                       value={targetGroupId}
@@ -694,15 +694,15 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                   </div>
                   <div>
                     <label className="text-[11px] font-semibold text-zinc-500 mb-1 block">
-                      Действие
+                      Дія
                     </label>
                     <select
                       value={devicePower ? 'on' : 'off'}
                       onChange={(e) => setDevicePower(e.target.value === 'on')}
                       className="w-full px-2.5 py-1.5 bg-white border border-black/10 rounded-xl text-xs font-medium"
                     >
-                      <option value="on">Включить всю группу</option>
-                      <option value="off">Выключить всю группу</option>
+                      <option value="on">Увімкнути всю групу</option>
+                      <option value="off">Вимкнути всю групу</option>
                     </select>
                   </div>
                 </div>
@@ -712,7 +712,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
               {actionKind === 'scene' && (
                 <div className="pt-2">
                   <label className="text-[11px] font-semibold text-zinc-500 mb-1 block">
-                    Выберите сценарий
+                    Оберіть сценарій
                   </label>
                   <select
                     value={targetSceneId}
@@ -721,7 +721,7 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                   >
                     {scenes.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.name} ({s.actions.length} действий)
+                        {s.name} ({s.actions.length} дій)
                       </option>
                     ))}
                   </select>
@@ -736,13 +736,13 @@ export const AutomationsModal: React.FC<AutomationsModalProps> = ({ isOpen, onCl
                 onClick={() => setIsCreating(false)}
                 className="px-4 py-2 text-zinc-600 hover:bg-zinc-100 rounded-xl text-xs font-semibold transition-colors"
               >
-                Отмена
+                Скасувати
               </button>
               <button
                 type="submit"
                 className="px-5 py-2 bg-[#0071E3] hover:bg-blue-600 text-white rounded-xl text-xs font-semibold transition-all active:scale-95 shadow-sm"
               >
-                Сохранить правило
+                Зберегти правило
               </button>
             </div>
           </form>

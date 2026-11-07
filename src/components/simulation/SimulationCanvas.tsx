@@ -222,8 +222,8 @@ export const SimulationCanvas: React.FC = () => {
       );
       const actionBadge = (roomThermostat?.getState() as any)?.climateActionState;
       let tempSuffix = '';
-      if (actionBadge === 'heating') tempSuffix = ' 🔥 Обогрев';
-      else if (actionBadge === 'cooling') tempSuffix = ' ❄️ Охлаждение';
+      if (actionBadge === 'heating') tempSuffix = ' 🔥 Обігрів';
+      else if (actionBadge === 'cooling') tempSuffix = ' ❄️ Охолодження';
       else if (roomThermostat && (roomThermostat.getState() as any).isOn) tempSuffix = ' ✨ Комфорт';
 
       const tempText = `🌡️ ${liveTemp.toFixed(1)}°C${tempSuffix}`;
@@ -467,7 +467,7 @@ export const SimulationCanvas: React.FC = () => {
 
       // Name tag pill
       ctx.font = '600 10px -apple-system, BlinkMacSystemFont, sans-serif';
-      const tagText = 'Человек (Вы)';
+      const tagText = 'Людина (Ви)';
       const tagWidth = ctx.measureText(tagText).width + 12;
       ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
       ctx.beginPath();

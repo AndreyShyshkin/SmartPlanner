@@ -85,9 +85,9 @@ export const ScenesModal: React.FC<ScenesModalProps> = ({ isOpen, onClose }) => 
               <Sparkles className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-zinc-900">Сценарии умного дома</h2>
+              <h2 className="text-lg font-bold text-zinc-900">Сценарії розумного будинку</h2>
               <p className="text-xs text-zinc-400">
-                Запуск набора действий на нескольких устройствах в один клик
+                Запуск набору дій на кількох пристроях в один клік
               </p>
             </div>
           </div>
@@ -105,7 +105,7 @@ export const ScenesModal: React.FC<ScenesModalProps> = ({ isOpen, onClose }) => 
             {scenes.length === 0 ? (
               <div className="text-center py-10 bg-zinc-50 rounded-2xl border border-dashed border-black/10">
                 <Sparkles className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
-                <p className="text-xs text-zinc-500">У вас пока нет настроенных сценариев</p>
+                <p className="text-xs text-zinc-500">У вас поки немає налаштованих сценаріїв</p>
               </div>
             ) : (
               scenes.map((scene) => (
@@ -120,7 +120,7 @@ export const ScenesModal: React.FC<ScenesModalProps> = ({ isOpen, onClose }) => 
                     <div>
                       <h4 className="font-semibold text-zinc-900 text-sm">{scene.name}</h4>
                       <p className="text-xs text-zinc-500">
-                        {scene.actions.length} устройств задействовано
+                        {scene.actions.length} пристроїв задіяно
                       </p>
                     </div>
                   </div>
@@ -130,7 +130,7 @@ export const ScenesModal: React.FC<ScenesModalProps> = ({ isOpen, onClose }) => 
                       onClick={() => handleExecute(scene.id)}
                       className="px-4 py-2 bg-[#0071E3] hover:bg-blue-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
                     >
-                      <Play className="w-3.5 h-3.5 fill-current" /> Запустить
+                      <Play className="w-3.5 h-3.5 fill-current" /> Запустити
                     </button>
                     <button
                       onClick={() => deleteScene(scene.id)}
@@ -147,28 +147,28 @@ export const ScenesModal: React.FC<ScenesModalProps> = ({ isOpen, onClose }) => 
               onClick={() => setIsCreating(true)}
               className="w-full mt-3 py-3 border-2 border-dashed border-black/10 hover:border-[#0071E3] text-zinc-600 hover:text-[#0071E3] rounded-2xl text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
             >
-              <Plus className="w-4 h-4" /> Создать новый сценарий
+              <Plus className="w-4 h-4" /> Створити новий сценарій
             </button>
           </div>
         ) : (
           <form onSubmit={handleSaveScene} className="py-4 space-y-4 max-h-[60vh] overflow-y-auto pr-1">
             <div>
               <label className="text-xs font-semibold text-zinc-500 mb-1.5 block">
-                Название сценария
+                Назва сценарію
               </label>
               <input
                 type="text"
                 required
                 value={sceneName}
                 onChange={(e) => setSceneName(e.target.value)}
-                placeholder="Например: Романтический ужин или Спокойной ночи"
+                placeholder="Наприклад: Романтична вечеря або Добраніч"
                 className="w-full px-3 py-2 bg-zinc-50 border border-black/10 rounded-xl text-sm font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#0071E3]"
               />
             </div>
 
             <div>
               <label className="text-xs font-semibold text-zinc-500 mb-1.5 block">
-                Иконка сценария
+                Іконка сценарію
               </label>
               <div className="flex items-center gap-2">
                 {Object.keys(SCENE_ICONS).map((iconKey) => (
@@ -190,7 +190,7 @@ export const ScenesModal: React.FC<ScenesModalProps> = ({ isOpen, onClose }) => 
 
             <div>
               <label className="text-xs font-semibold text-zinc-500 mb-2 block">
-                Выберите устройства и их состояние для этого сценария:
+                Виберіть пристрої та їхній стан для цього сценарію:
               </label>
               <div className="space-y-2">
                 {Array.from(devices.values()).map((dev) => {
@@ -252,14 +252,14 @@ export const ScenesModal: React.FC<ScenesModalProps> = ({ isOpen, onClose }) => 
                                     : 'bg-zinc-200 text-zinc-700'
                                 }`}
                               >
-                                {action?.statePatch.isOn ? 'Включить' : 'Выключить'}
+                                {action?.statePatch.isOn ? 'Увімкнути' : 'Вимкнути'}
                               </button>
                             </>
                           )}
 
                           {dev.type === 'curtains' && (
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[11px] text-zinc-500">Положение:</span>
+                              <span className="text-[11px] text-zinc-500">Положення:</span>
                               <button
                                 type="button"
                                 onClick={() =>
@@ -277,7 +277,7 @@ export const ScenesModal: React.FC<ScenesModalProps> = ({ isOpen, onClose }) => 
                                     : 'bg-zinc-200'
                                 }`}
                               >
-                                Закрыть
+                                Закрити
                               </button>
                               <button
                                 type="button"
@@ -296,7 +296,7 @@ export const ScenesModal: React.FC<ScenesModalProps> = ({ isOpen, onClose }) => 
                                     : 'bg-zinc-200'
                                 }`}
                               >
-                                Открыть
+                                Відкрити
                               </button>
                             </div>
                           )}
@@ -314,13 +314,13 @@ export const ScenesModal: React.FC<ScenesModalProps> = ({ isOpen, onClose }) => 
                 onClick={() => setIsCreating(false)}
                 className="px-4 py-2 text-zinc-600 hover:bg-zinc-100 rounded-xl text-xs font-semibold transition-colors"
               >
-                Отмена
+                Скасувати
               </button>
               <button
                 type="submit"
                 className="px-5 py-2 bg-[#0071E3] hover:bg-blue-600 text-white rounded-xl text-xs font-semibold transition-all active:scale-95 shadow-sm"
               >
-                Сохранить сценарий
+                Зберегти сценарій
               </button>
             </div>
           </form>

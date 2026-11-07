@@ -43,7 +43,7 @@ export const DeviceGroupsModal: React.FC<DeviceGroupsModalProps> = ({
         <div className="flex items-center justify-between pb-4 border-b border-black/5">
           <div className="flex items-center gap-2">
             <Folder className="w-5 h-5 text-[#0071E3]" />
-            <h2 className="text-lg font-bold text-zinc-900">Группы устройств</h2>
+            <h2 className="text-lg font-bold text-zinc-900">Групи пристроїв</h2>
           </div>
           <button
             onClick={onClose}
@@ -56,7 +56,7 @@ export const DeviceGroupsModal: React.FC<DeviceGroupsModalProps> = ({
         {/* Existing Groups List */}
         <div className="my-4 space-y-3 max-h-[50vh] overflow-y-auto pr-1">
           {deviceGroups.length === 0 ? (
-            <p className="text-xs text-zinc-400 text-center py-4">Нет созданных групп</p>
+            <p className="text-xs text-zinc-400 text-center py-4">Немає створених груп</p>
           ) : (
             deviceGroups.map((group) => {
               const groupDevices = Array.from(devices.values()).filter(
@@ -75,7 +75,7 @@ export const DeviceGroupsModal: React.FC<DeviceGroupsModalProps> = ({
                     <div>
                       <h4 className="font-semibold text-xs text-zinc-900">{group.name}</h4>
                       <span className="text-[11px] text-zinc-400">
-                        {groupDevices.length} устройств в группе
+                        {groupDevices.length} пристроїв у групі
                       </span>
                     </div>
                   </div>
@@ -93,20 +93,20 @@ export const DeviceGroupsModal: React.FC<DeviceGroupsModalProps> = ({
 
         {/* Create new group */}
         <form onSubmit={handleCreateGroup} className="pt-4 border-t border-black/5 space-y-3">
-          <span className="text-xs font-semibold text-zinc-600 block">Создать новую группу</span>
+          <span className="text-xs font-semibold text-zinc-600 block">Створити нову групу</span>
           <div className="flex gap-2">
             <input
               type="text"
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
-              placeholder="Название (например: Освещение кухни)"
+              placeholder="Назва (наприклад: Освітлення кухні)"
               className="flex-1 px-3 py-2 bg-zinc-50 border border-black/10 rounded-xl text-xs font-medium text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#0071E3]"
             />
             <button
               type="submit"
               className="px-4 py-2 bg-[#0071E3] hover:bg-blue-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
             >
-              <Plus className="w-4 h-4" /> Добавить
+              <Plus className="w-4 h-4" /> Додати
             </button>
           </div>
 

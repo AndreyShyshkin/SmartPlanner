@@ -31,7 +31,7 @@ export class SetDeviceStateAction implements IAutomationAction {
     const keys = Object.entries(this.statePatch)
       .map(([k, v]) => `${k}=${v}`)
       .join(', ');
-    return `Установить устройство: ${keys}`;
+    return `Встановити стан пристрою: ${keys}`;
   }
 
   public toJSON(): SetDeviceStateActionData {
@@ -71,7 +71,7 @@ export class SetGroupStateAction implements IAutomationAction {
   }
 
   public getDescription(): string {
-    return `Изменить группу устройств (${this.groupId})`;
+    return `Змінити стан групи пристроїв (${this.groupId})`;
   }
 
   public toJSON(): SetGroupStateActionData {

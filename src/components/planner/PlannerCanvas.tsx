@@ -211,7 +211,7 @@ export const PlannerCanvas: React.FC = () => {
         ctx.textBaseline = 'middle';
 
         // Badge pill
-        const nameText = room.name || 'Комната';
+        const nameText = room.name || 'Кімната';
         const areaText = `${(room.getArea() * 0.25).toFixed(1)} м²`;
         ctx.font = '600 12px -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif';
         const textWidth = Math.max(ctx.measureText(nameText).width, ctx.measureText(areaText).width);
@@ -467,8 +467,8 @@ export const PlannerCanvas: React.FC = () => {
       // Tooltip following cursor
       const labelText =
         placingDeviceType === 'door_sensor'
-          ? 'Нажмите на дверь для установки'
-          : 'Нажмите, чтобы поставить';
+          ? 'Натисніть на двері для встановлення'
+          : 'Натисніть, щоб встановити';
       ctx.font = '600 10px -apple-system, BlinkMacSystemFont, sans-serif';
       const tw = ctx.measureText(labelText).width + 14;
       ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
@@ -615,7 +615,7 @@ export const PlannerCanvas: React.FC = () => {
         );
 
         if (!targetDoor) {
-          alert('Датчик открытия можно устанавливать только на двери! Пожалуйста, нажмите на дверной проем.');
+          alert('Датчик відкриття можна встановлювати тільки на двері! Будь ласка, натисніть на дверний отвір.');
           return;
         }
 
@@ -659,7 +659,7 @@ export const PlannerCanvas: React.FC = () => {
         setSelectedEntity({ type: 'room', id: clickedRoom.id });
         addTilesToRoom(clickedRoom.id, [cell]);
       } else {
-        const room = addRoom(`Комната ${rooms.length + 1}`, activeRoomColor, [cell]);
+        const room = addRoom(`Кімната ${rooms.length + 1}`, activeRoomColor, [cell]);
         setSelectedEntity({ type: 'room', id: room.id });
       }
     } else if (activeTool === 'eraser') {
@@ -832,7 +832,7 @@ export const PlannerCanvas: React.FC = () => {
       }
 
       if (tiles.length > 0) {
-        const room = addRoom(`Комната ${rooms.length + 1}`, activeRoomColor, tiles);
+        const room = addRoom(`Кімната ${rooms.length + 1}`, activeRoomColor, tiles);
         setSelectedEntity({ type: 'room', id: room.id });
       }
     }
@@ -852,12 +852,12 @@ export const PlannerCanvas: React.FC = () => {
             <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
             <div>
               <h4 className="text-xs font-bold text-zinc-900">
-                Размещение: {DeviceFactory.getDefaultName(placingDeviceType)}
+                Розміщення: {DeviceFactory.getDefaultName(placingDeviceType)}
               </h4>
               <p className="text-[11px] text-zinc-500">
                 {placingDeviceType === 'door_sensor'
-                  ? '🚪 Нажмите на дверной проем на плане (подсвечен зеленым)'
-                  : '📍 Нажмите на плане в месте, куда хотите установить устройство'}
+                  ? '🚪 Натисніть на дверний отвір на плані (підсвічено зеленим)'
+                  : '📍 Натисніть на плані у місці, де хочете встановити пристрій'}
               </p>
             </div>
           </div>
@@ -865,7 +865,7 @@ export const PlannerCanvas: React.FC = () => {
             onClick={() => setPlacingDeviceType(null)}
             className="px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors"
           >
-            <X className="w-3.5 h-3.5" /> Отмена (Esc)
+            <X className="w-3.5 h-3.5" /> Скасувати (Esc)
           </button>
         </div>
       )}

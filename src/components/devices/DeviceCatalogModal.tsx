@@ -40,60 +40,60 @@ export const DeviceCatalogModal: React.FC<DeviceCatalogModalProps> = ({
   const catalog: DeviceCatalogItem[] = [
     {
       type: 'light',
-      title: 'Умная лампа',
-      category: 'Освещение',
-      description: 'Регулировка яркости, палитры RGB и управление сценариями освещения.',
+      title: 'Розумна лампа',
+      category: 'Освітлення',
+      description: 'Регулювання яскравості, палітри RGB та керування сценаріями освітлення.',
       icon: <Lightbulb className="w-6 h-6 text-yellow-500" />,
     },
     {
       type: 'motion',
-      title: 'Датчик движения',
-      category: 'Безопасность и датчики',
-      description: 'Фиксация людей с учетом геометрии стен (луч не пробивает стены) и настраиваемым радиусом.',
+      title: 'Датчик руху',
+      category: 'Безпека та датчики',
+      description: 'Фіксація людей з урахуванням геометрії стін (промінь не проходить крізь стіни) та радіусом, що налаштовується.',
       icon: <Activity className="w-6 h-6 text-blue-500" />,
       badge: 'Raycast FOV',
     },
     {
       type: 'door_sensor',
-      title: 'Датчик открытия двери',
-      category: 'Безопасность и датчики',
-      description: 'Монтируется только на дверной проем. Срабатывает при проходе человека через дверь.',
+      title: 'Датчик відкриття дверей',
+      category: 'Безпека та датчики',
+      description: 'Монтується тільки на дверний отвір. Спрацьовує під час проходу людини крізь двері.',
       icon: <DoorOpen className="w-6 h-6 text-amber-500" />,
-      badge: 'Только двери',
+      badge: 'Тільки двері',
     },
     {
       type: 'thermostat',
       title: 'Термостат',
-      category: 'Климат',
-      description: 'Контроль целевой температуры, отображение текущей температуры в комнате.',
+      category: 'Клімат',
+      description: 'Контроль цільової температури, відображення поточної температури в кімнаті.',
       icon: <Thermometer className="w-6 h-6 text-orange-500" />,
     },
     {
       type: 'heater',
-      title: 'Умная батарея (радиатор)',
-      category: 'Отопление',
-      description: 'Регулирует мощность обогрева и динамически поднимает температуру в помещении.',
+      title: 'Розумна батарея (радіатор)',
+      category: 'Опалення',
+      description: 'Регулює потужність обігріву та динамічно підвищує температуру в приміщенні.',
       icon: <Flame className="w-6 h-6 text-red-500" />,
     },
     {
       type: 'curtains',
-      title: 'Умные шторы',
+      title: 'Розумні штори',
       category: 'Комфорт',
-      description: 'Электропривод карниза с точным процентом открытия и интеграцией в сценарии.',
+      description: 'Електропривід карниза з точним відсотком відкриття та інтеграцією в сценарії.',
       icon: <Blinds className="w-6 h-6 text-indigo-500" />,
     },
     {
       type: 'ac',
-      title: 'Кондиционер',
-      category: 'Климат',
-      description: 'Охлаждение и вентиляция помещения, выбор скорости обдува и целевой температуры.',
+      title: 'Кондиціонер',
+      category: 'Клімат',
+      description: 'Охолодження та вентиляція приміщення, вибір швидкості обдуву та цільової температури.',
       icon: <Wind className="w-6 h-6 text-cyan-500" />,
     },
     {
       type: 'socket',
-      title: 'Умная розетка',
-      category: 'Энергия',
-      description: 'Контроль питания приборов и мониторинг энергопотребления в ваттах.',
+      title: 'Розумна розетка',
+      category: 'Енергія',
+      description: 'Контроль живлення приладів та моніторинг енергоспоживання у ватах.',
       icon: <Zap className="w-6 h-6 text-amber-400" />,
     },
   ];
@@ -104,9 +104,9 @@ export const DeviceCatalogModal: React.FC<DeviceCatalogModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-black/5">
           <div>
-            <h2 className="text-xl font-bold text-zinc-900">Каталог устройств Apple Home</h2>
+            <h2 className="text-xl font-bold text-zinc-900">Каталог пристроїв Apple Home</h2>
             <p className="text-xs text-zinc-500 mt-0.5">
-              Выберите устройство для размещения на 2D плане умного дома
+              Виберіть пристрій для розміщення на 2D плані розумного будинку
             </p>
           </div>
           <button
@@ -152,7 +152,7 @@ export const DeviceCatalogModal: React.FC<DeviceCatalogModalProps> = ({
                   {item.category}
                 </span>
                 <span className="text-xs font-semibold text-[#0071E3] group-hover:translate-x-1 transition-transform">
-                  Разместить →
+                  Розмістити →
                 </span>
               </div>
             </div>

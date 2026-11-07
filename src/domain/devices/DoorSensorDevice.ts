@@ -67,8 +67,8 @@ export class DoorSensorDevice extends BaseDevice<DoorSensorState> implements ISe
   }
 
   public getStatusSummary(): string {
-    if (!this.state.isOn) return 'Off';
-    return this.state.isOpen ? 'Open' : 'Closed';
+    if (!this.state.isOn) return 'Вимкнено';
+    return this.state.isOpen ? 'Відчинено' : 'Зачинено';
   }
 
   public getIconName(): string {

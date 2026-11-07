@@ -46,8 +46,8 @@ export class HeaterDevice
   }
 
   public getStatusSummary(): string {
-    if (!this.state.isOn) return 'Off';
-    return `${this.state.powerLevel}% Heat`;
+    if (!this.state.isOn) return 'Вимкнено';
+    return `${this.state.powerLevel}% Обігрів`;
   }
 
   public getIconName(): string {

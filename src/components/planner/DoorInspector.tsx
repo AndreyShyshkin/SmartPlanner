@@ -19,7 +19,7 @@ export const DoorInspector: React.FC = () => {
       <div className="flex items-center justify-between pb-3 border-b border-black/5">
         <div className="flex items-center gap-2">
           <DoorOpen className="w-4 h-4 text-[#0071E3]" />
-          <h3 className="font-semibold text-zinc-900 text-sm">{door.name || 'Дверной проем'}</h3>
+          <h3 className="font-semibold text-zinc-900 text-sm">{door.name || 'Дверний отвір'}</h3>
         </div>
         <button
           onClick={() => setSelectedEntity({ type: null, id: null })}
@@ -32,7 +32,7 @@ export const DoorInspector: React.FC = () => {
       <div className="mt-4 space-y-4">
         {/* Toggle Door State */}
         <div className="bg-zinc-50 rounded-xl p-3 border border-black/5 flex items-center justify-between">
-          <span className="text-xs font-medium text-zinc-600">Положение створки</span>
+          <span className="text-xs font-medium text-zinc-600">Положення стулки</span>
           <button
             onClick={() => toggleDoor(door.id)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
@@ -43,11 +43,11 @@ export const DoorInspector: React.FC = () => {
           >
             {door.isOpen ? (
               <>
-                <DoorOpen className="w-3.5 h-3.5" /> Открыта
+                <DoorOpen className="w-3.5 h-3.5" /> Відчинена
               </>
             ) : (
               <>
-                <DoorClosed className="w-3.5 h-3.5" /> Закрыта
+                <DoorClosed className="w-3.5 h-3.5" /> Зачинена
               </>
             )}
           </button>
@@ -55,8 +55,8 @@ export const DoorInspector: React.FC = () => {
 
         {/* Orientation & Position */}
         <div className="text-xs text-zinc-500 space-y-1">
-          <div>Ориентация: <span className="font-semibold text-zinc-700">{door.orientation === 'horizontal' ? 'Горизонтальная' : 'Вертикальная'}</span></div>
-          <div>Координаты: <span className="font-semibold text-zinc-700">({door.x}, {door.y})</span></div>
+          <div>Орієнтація: <span className="font-semibold text-zinc-700">{door.orientation === 'horizontal' ? 'Горизонтальна' : 'Вертикальна'}</span></div>
+          <div>Координати: <span className="font-semibold text-zinc-700">({door.x}, {door.y})</span></div>
         </div>
 
         <button
@@ -65,7 +65,7 @@ export const DoorInspector: React.FC = () => {
           }}
           className="w-full mt-2 py-2.5 px-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-colors active:scale-[0.98]"
         >
-          <Trash2 className="w-4 h-4" /> Удалить дверь
+          <Trash2 className="w-4 h-4" /> Видалити двері
         </button>
       </div>
     </div>

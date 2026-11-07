@@ -63,13 +63,13 @@ export const AppleHomeView: React.FC<AppleHomeViewProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
-              Умный дом Apple Home
+              Розумний будинок Apple Home
             </h1>
             <p className="text-xs text-zinc-500 mt-1 flex items-center gap-3">
-              <span>{deviceList.length} устройств всего</span>
+              <span>{deviceList.length} пристроїв усього</span>
               <span>•</span>
               <span className="text-emerald-600 font-medium">
-                {activeCount} включено сейчас
+                {activeCount} увімкнено зараз
               </span>
             </p>
           </div>
@@ -81,7 +81,7 @@ export const AppleHomeView: React.FC<AppleHomeViewProps> = ({
               onClick={onOpenScenesModal}
               className="px-4 py-2.5 bg-white/80 hover:bg-white text-zinc-800 border border-black/10 rounded-2xl shadow-xs hover:shadow-apple font-semibold text-xs flex items-center gap-2 transition-all active:scale-95"
             >
-              <Sparkles className="w-4 h-4 text-purple-500" /> Сценарии
+              <Sparkles className="w-4 h-4 text-purple-500" /> Сценарії
             </button>
 
             {/* Automations Button */}
@@ -89,7 +89,7 @@ export const AppleHomeView: React.FC<AppleHomeViewProps> = ({
               onClick={onOpenAutomationsModal}
               className="px-4 py-2.5 bg-white/80 hover:bg-white text-zinc-800 border border-black/10 rounded-2xl shadow-xs hover:shadow-apple font-semibold text-xs flex items-center gap-2 transition-all active:scale-95"
             >
-              <Cpu className="w-4 h-4 text-blue-500" /> Автоматизации
+              <Cpu className="w-4 h-4 text-blue-500" /> Автоматизації
             </button>
 
             {/* Device Groups */}
@@ -97,7 +97,7 @@ export const AppleHomeView: React.FC<AppleHomeViewProps> = ({
               onClick={() => setIsGroupsOpen(true)}
               className="px-4 py-2.5 bg-white/80 hover:bg-white text-zinc-800 border border-black/10 rounded-2xl shadow-xs hover:shadow-apple font-semibold text-xs flex items-center gap-2 transition-all active:scale-95"
             >
-              <Layers className="w-4 h-4 text-amber-500" /> Группы
+              <Layers className="w-4 h-4 text-amber-500" /> Групи
             </button>
 
             {/* Plus Button (Add Device) */}
@@ -105,7 +105,7 @@ export const AppleHomeView: React.FC<AppleHomeViewProps> = ({
               onClick={() => setIsCatalogOpen(true)}
               className="px-5 py-2.5 bg-[#0071E3] hover:bg-blue-600 text-white rounded-2xl shadow-apple font-semibold text-xs flex items-center gap-2 transition-all active:scale-95"
             >
-              <Plus className="w-4 h-4 stroke-[2.5]" /> Добавить устройство
+              <Plus className="w-4 h-4 stroke-[2.5]" /> Додати пристрій
             </button>
           </div>
         </div>
@@ -120,7 +120,7 @@ export const AppleHomeView: React.FC<AppleHomeViewProps> = ({
                 : 'bg-white/80 text-zinc-600 hover:bg-white border border-black/5'
             }`}
           >
-            Все комнаты ({deviceList.length})
+            Всі кімнати ({deviceList.length})
           </button>
           {rooms.map((room) => {
             const count = deviceList.filter((d) => d.roomId === room.id).length;
@@ -151,15 +151,15 @@ export const AppleHomeView: React.FC<AppleHomeViewProps> = ({
             <div className="p-4 bg-zinc-100 rounded-2xl mb-3">
               <Plus className="w-8 h-8 text-zinc-400" />
             </div>
-            <h3 className="font-semibold text-zinc-800 text-sm">В этой категории нет устройств</h3>
+            <h3 className="font-semibold text-zinc-800 text-sm">У цій категорії немає пристроїв</h3>
             <p className="text-xs text-zinc-400 mt-1 max-w-sm">
-              Нажмите кнопку «Добавить устройство», чтобы выбрать сенсор, лампу, климат или батарею.
+              Натисніть кнопку «Додати пристрій», щоб вибрати сенсор, лампу, клімат або батарею.
             </p>
             <button
               onClick={() => setIsCatalogOpen(true)}
               className="mt-4 px-4 py-2 bg-[#0071E3] text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition-colors"
             >
-              Открыть каталог
+              Відкрити каталог
             </button>
           </div>
         ) : (

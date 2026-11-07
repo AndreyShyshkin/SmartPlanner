@@ -41,9 +41,9 @@ export class CurtainDevice extends BaseDevice<CurtainState> implements IControll
   }
 
   public getStatusSummary(): string {
-    if (this.state.openPercentage === 0) return 'Closed';
-    if (this.state.openPercentage === 100) return 'Open';
-    return `${this.state.openPercentage}% Open`;
+    if (this.state.openPercentage === 0) return 'Зачинено';
+    if (this.state.openPercentage === 100) return 'Відчинено';
+    return `${this.state.openPercentage}% Відчинено`;
   }
 
   public getIconName(): string {
